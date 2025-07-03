@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { supabase } from "@/integrations/supabase/client"
 import { Header } from "@/components/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import { PremiumBanner } from "@/components/premium/PremiumBanner"
 
 interface SimulationForm {
   name: string
+  category: string
   type: string
   initialValue: string
   duration: string
@@ -24,12 +26,65 @@ interface SimulationForm {
   monthlyContribution: string
 }
 
+interface InvestmentCategory {
+  id: string
+  name: string
+  types: InvestmentType[]
+}
+
+interface InvestmentType {
+  id: string
+  name: string
+  description: string
+  currentRate?: number
+}
+
+const investmentCategories: InvestmentCategory[] = [
+  {
+    id: 'renda-fixa',
+    name: 'Renda Fixa',
+    types: [
+      {
+        id: 'tesouro-direto',
+        name: 'Tesouro Direto',
+        description: 'Títulos públicos do governo federal'
+      },
+      {
+        id: 'cdb',
+        name: 'CDB (Certificado de Depósito Bancário)',
+        description: 'Investimento em bancos com garantia do FGC'
+      },
+      {
+        id: 'lci',
+        name: 'LCI (Letra de Crédito Imobiliário)',
+        description: 'Investimento do setor imobiliário, isento de IR'
+      },
+      {
+        id: 'lca',
+        name: 'LCA (Letra de Crédito do Agronegócio)',
+        description: 'Investimento do agronegócio, isento de IR'
+      },
+      {
+        id: 'debentures',
+        name: 'Debêntures',
+        description: 'Títulos de dívida corporativa'
+      },
+      {
+        id: 'letras-cambio',
+        name: 'Letras de Câmbio',
+        description: 'Títulos de financeiras e sociedades de crédito'
+      }
+    ]
+  }
+]
+
 export default function SimularInvestimento() {
   const { toast } = useToast()
   const { createSimulation } = useInvestmentSimulations()
   const { isPremium } = useUserProfile()
   const [form, setForm] = useState<SimulationForm>({
     name: "",
+    category: "",
     type: "",
     initialValue: "",
     duration: "",
@@ -37,13 +92,54 @@ export default function SimularInvestimento() {
     hasMonthlyContribution: false,
     monthlyContribution: ""
   })
+  const [investmentRates, setInvestmentRates] = useState<Record<string, number>>({})
   const [showResults, setShowResults] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [loadingRates, setLoadingRates] = useState(false)
+
+  // Buscar taxas reais ao carregar a página
+  useEffect(() => {
+    fetchInvestmentRates()
+  }, [])
+
+  const fetchInvestmentRates = async () => {
+    setLoadingRates(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('get-investment-rates')
+      
+      if (error) throw error
+      
+      if (data?.rates) {
+        const rates: Record<string, number> = {}
+        Object.entries(data.rates).forEach(([key, value]: [string, any]) => {
+          rates[key] = value.rate
+        })
+        setInvestmentRates(rates)
+      }
+    } catch (error) {
+      console.error('Error fetching investment rates:', error)
+      toast({
+        title: "Aviso",
+        description: "Não foi possível obter as taxas atualizadas. Usando taxas estimadas.",
+        variant: "default",
+      })
+    } finally {
+      setLoadingRates(false)
+    }
+  }
+
+  // Função para buscar taxa específica de um investimento
+  const getCurrentRate = (investmentType: string): number => {
+    return investmentRates[investmentType] || 0.12 // fallback para 12%
+  }
+
+  const selectedCategory = investmentCategories.find(cat => cat.id === form.category)
+  const availableTypes = selectedCategory?.types || []
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!form.name || !form.type || !form.initialValue || !form.duration) {
+    if (!form.name || !form.category || !form.type || !form.initialValue || !form.duration) {
       toast({
         title: "Campos obrigatórios",
         description: "Preencha todos os campos para simular",
@@ -62,6 +158,7 @@ export default function SimularInvestimento() {
   const handleNewSimulation = () => {
     setForm({
       name: "",
+      category: "",
       type: "",
       initialValue: "",
       duration: "",
@@ -86,20 +183,14 @@ export default function SimularInvestimento() {
     setForm(prev => ({ ...prev, [field]: numericValue }))
   }
 
-  // Cálculos mockados para demonstração
+  // Cálculos usando taxas reais
   const initialValueNum = Number(form.initialValue) / 100
   const monthlyContributionNum = form.hasMonthlyContribution ? Number(form.monthlyContribution) / 100 : 0
   const duration = Number(form.duration)
   const years = form.durationType === "anos" ? duration : duration / 12
 
-  const mockReturns: Record<string, number> = {
-    "cdb": 0.12,
-    "tesouro": 0.10,
-    "acoes": 0.15,
-    "fiis": 0.08
-  }
-
-  const annualReturn = mockReturns[form.type] || 0.12
+  // Usar taxa real do investimento selecionado
+  const annualReturn = form.type ? getCurrentRate(form.type) : 0.12
   const totalInvested = initialValueNum + (monthlyContributionNum * 12 * years)
   const finalValue = totalInvested * Math.pow(1 + annualReturn, years)
   const profit = finalValue - totalInvested
@@ -142,19 +233,57 @@ export default function SimularInvestimento() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="type">Tipo de Investimento</Label>
-                <Select value={form.type} onValueChange={(value) => setForm(prev => ({ ...prev, type: value }))}>
+                <Label htmlFor="category">Categoria de Investimento</Label>
+                <Select 
+                  value={form.category} 
+                  onValueChange={(value) => setForm(prev => ({ ...prev, category: value, type: "" }))}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o tipo" />
+                    <SelectValue placeholder="Selecione a categoria" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="cdb">Renda Fixa (CDB)</SelectItem>
-                    <SelectItem value="tesouro">Tesouro Direto</SelectItem>
-                    <SelectItem value="acoes">Renda Variável (Ações)</SelectItem>
-                    <SelectItem value="fiis">Fundos Imobiliários</SelectItem>
+                    {investmentCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {form.category && (
+                <div className="space-y-2">
+                  <Label htmlFor="type">Tipo de Investimento</Label>
+                  <Select 
+                    value={form.type} 
+                    onValueChange={(value) => setForm(prev => ({ ...prev, type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTypes.map((type) => {
+                        const currentRate = getCurrentRate(type.id)
+                        return (
+                          <SelectItem key={type.id} value={type.id}>
+                            <div className="flex flex-col">
+                              <span>{type.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {loadingRates ? 'Carregando...' : `Taxa atual: ${(currentRate * 100).toFixed(2)}% a.a.`}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {form.type && (
+                    <p className="text-sm text-muted-foreground">
+                      {availableTypes.find(t => t.id === form.type)?.description}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="initialValue">Valor Inicial</Label>
@@ -296,7 +425,9 @@ export default function SimularInvestimento() {
                     </div>
                     <div>
                       <span className="text-muted-foreground">Tipo:</span>
-                      <p className="font-medium">{form.type}</p>
+                      <p className="font-medium">
+                        {availableTypes.find(t => t.id === form.type)?.name || form.type}
+                      </p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Valor Inicial:</span>
