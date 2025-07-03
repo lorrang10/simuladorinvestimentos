@@ -5,72 +5,92 @@ import { SimulationChart } from "@/components/simulation-chart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-
-const recentSimulations = [
-  {
-    id: 1,
-    name: "CDB Banco Inter",
-    type: "Renda Fixa",
-    initialValue: 10000,
-    return: 15420,
-    date: "2024-01-15",
-    status: "completed"
-  },
-  {
-    id: 2,
-    name: "Tesouro IPCA+",
-    type: "Tesouro Direto",
-    initialValue: 5000,
-    return: 7200,
-    date: "2024-01-10",
-    status: "completed"
-  },
-  {
-    id: 3,
-    name: "Ações VALE3",
-    type: "Renda Variável",
-    initialValue: 8000,
-    return: 9600,
-    date: "2024-01-08",
-    status: "active"
-  }
-]
+import { Skeleton } from "@/components/ui/skeleton"
+import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function Dashboard() {
+  const { user } = useAuth()
+  const { simulations, loading } = useInvestmentSimulations()
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR')
+  }
+
+  const getTotalValue = () => {
+    return simulations.reduce((total, sim) => total + sim.valor_final, 0)
+  }
+
+  const getTotalInvested = () => {
+    return simulations.reduce((total, sim) => total + sim.valor_inicial + (sim.valor_mensal * 12 * sim.periodo_anos), 0)
+  }
+
+  const getAverageReturn = () => {
+    if (simulations.length === 0) return 0
+    const totalReturn = simulations.reduce((total, sim) => total + sim.taxa_juros, 0)
+    return (totalReturn / simulations.length) * 100
+  }
+
+  const recentSimulations = simulations.slice(0, 3)
   return (
     <div className="flex-1 space-y-6 p-6">
       <Header title="Dashboard" />
       
       {/* Cards de Métricas */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Simulado"
-          value="R$ 128.340"
-          description="+12% em relação ao mês anterior"
-          icon={<DollarSign className="h-4 w-4" />}
-          trend="up"
-        />
-        <MetricCard
-          title="Simulações Ativas"
-          value="8"
-          description="3 novas nesta semana"
-          icon={<BarChart className="h-4 w-4" />}
-          trend="up"
-        />
-        <MetricCard
-          title="Retorno Médio"
-          value="18,5%"
-          description="Baseado em 15 simulações"
-          icon={<TrendingUp className="h-4 w-4" />}
-          trend="up"
-        />
-        <MetricCard
-          title="Meta Mensal"
-          value="75%"
-          description="R$ 15.000 de R$ 20.000"
-          icon={<Target className="h-4 w-4" />}
-          trend="neutral"
-        />
+        {loading ? (
+          <>
+            {[...Array(4)].map((_, i) => (
+              <Card key={i}>
+                <CardHeader className="pb-2">
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-32 mb-2" />
+                  <Skeleton className="h-3 w-40" />
+                </CardContent>
+              </Card>
+            ))}
+          </>
+        ) : (
+          <>
+            <MetricCard
+              title="Total Estimado"
+              value={formatCurrency(getTotalValue())}
+              description={`Baseado em ${simulations.length} simulações`}
+              icon={<DollarSign className="h-4 w-4" />}
+              trend="up"
+            />
+            <MetricCard
+              title="Simulações Salvas"
+              value={simulations.length.toString()}
+              description="Histórico completo"
+              icon={<BarChart className="h-4 w-4" />}
+              trend="up"
+            />
+            <MetricCard
+              title="Retorno Médio"
+              value={`${getAverageReturn().toFixed(1)}%`}
+              description="Taxa anual média"
+              icon={<TrendingUp className="h-4 w-4" />}
+              trend="up"
+            />
+            <MetricCard
+              title="Total Investido"
+              value={formatCurrency(getTotalInvested())}
+              description="Capital + aportes"
+              icon={<Target className="h-4 w-4" />}
+              trend="neutral"
+            />
+          </>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -96,28 +116,47 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentSimulations.map((simulation) => (
-              <div key={simulation.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium text-sm">{simulation.name}</h4>
-                    <Badge variant={simulation.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                      {simulation.status === 'active' ? 'Ativa' : 'Concluída'}
-                    </Badge>
+            {loading ? (
+              <>
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="p-3 border rounded-lg">
+                    <Skeleton className="h-4 w-32 mb-2" />
+                    <Skeleton className="h-3 w-24 mb-2" />
+                    <Skeleton className="h-3 w-48" />
                   </div>
-                  <p className="text-xs text-muted-foreground">{simulation.type}</p>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span>Inicial: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(simulation.initialValue)}</span>
-                    <span className="text-success">
-                      Retorno: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(simulation.return)}
-                    </span>
+                ))}
+              </>
+            ) : recentSimulations.length > 0 ? (
+              recentSimulations.map((simulation) => (
+                <div key={simulation.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium text-sm">{simulation.nome}</h4>
+                      <Badge variant="default" className="text-xs">Salva</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{simulation.periodo_anos} anos</p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span>Inicial: {formatCurrency(simulation.valor_inicial)}</span>
+                      <span className="text-success">
+                        Retorno: {formatCurrency(simulation.valor_final)}
+                      </span>
+                    </div>
                   </div>
+                  <Button variant="ghost" size="sm">
+                    Ver Detalhes
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm">
-                  Ver Detalhes
-                </Button>
+              ))
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-muted-foreground text-sm">
+                  Nenhuma simulação encontrada. 
+                  <Button variant="link" className="p-0 h-auto text-sm ml-1">
+                    Criar primeira simulação
+                  </Button>
+                </p>
               </div>
-            ))}
+            )}
           </CardContent>
         </Card>
       </div>

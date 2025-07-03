@@ -5,6 +5,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppSidebar } from "@/components/app-sidebar";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import SimularInvestimento from "./pages/SimularInvestimento";
 import MeusInvestimentos from "./pages/MeusInvestimentos";
@@ -16,27 +18,31 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <SidebarProvider>
-          <div className="min-h-screen flex w-full bg-background">
-            <AppSidebar />
-            <main className="flex-1 overflow-auto">
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/simular" element={<SimularInvestimento />} />
-                <Route path="/historico" element={<MeusInvestimentos />} />
-                <Route path="/configuracoes" element={<Configuracoes />} />
-                <Route path="/ajuda" element={<Ajuda />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-        </SidebarProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ProtectedRoute>
+            <SidebarProvider>
+              <div className="min-h-screen flex w-full bg-background">
+                <AppSidebar />
+                <main className="flex-1 overflow-auto">
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/simular" element={<SimularInvestimento />} />
+                    <Route path="/historico" element={<MeusInvestimentos />} />
+                    <Route path="/configuracoes" element={<Configuracoes />} />
+                    <Route path="/ajuda" element={<Ajuda />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+              </div>
+            </SidebarProvider>
+          </ProtectedRoute>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

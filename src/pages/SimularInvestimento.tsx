@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { SimulationChart } from "@/components/simulation-chart"
 import { MetricCard } from "@/components/metric-card"
-import { TrendingUp, DollarSign, Calendar, Percent } from "lucide-react"
+import { TrendingUp, DollarSign, Calendar, Percent, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 
 interface SimulationForm {
   name: string
@@ -23,6 +24,7 @@ interface SimulationForm {
 
 export default function SimularInvestimento() {
   const { toast } = useToast()
+  const { createSimulation } = useInvestmentSimulations()
   const [form, setForm] = useState<SimulationForm>({
     name: "",
     type: "",
@@ -33,6 +35,7 @@ export default function SimularInvestimento() {
     monthlyContribution: ""
   })
   const [showResults, setShowResults] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -295,12 +298,24 @@ export default function SimularInvestimento() {
                       </div>
                     )}
                   </div>
-                  <Button className="w-full" onClick={() => {
-                    toast({
-                      title: "Simulação salva!",
-                      description: "Você pode encontrá-la em 'Meus Investimentos'",
-                    })
-                  }}>
+                  <Button 
+                    className="w-full" 
+                    onClick={async () => {
+                      setSaving(true)
+                      await createSimulation({
+                        nome: form.name,
+                        valor_inicial: initialValueNum,
+                        valor_mensal: monthlyContributionNum,
+                        taxa_juros: annualReturn,
+                        periodo_anos: years,
+                        valor_final: finalValue,
+                        rendimento_total: profit,
+                      })
+                      setSaving(false)
+                    }}
+                    disabled={saving}
+                  >
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Salvar Simulação
                   </Button>
                 </CardContent>

@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { BarChart, Home, FolderOpen, Settings, HelpCircle, LogOut } from "lucide-react"
+import { BarChart, Home, FolderOpen, Settings, HelpCircle, LogOut, User } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 
 import {
   Sidebar,
@@ -28,6 +29,7 @@ const bottomItems = [
 
 export function AppSidebar() {
   const { state } = useSidebar()
+  const { user, signOut } = useAuth()
   const location = useLocation()
   const currentPath = location.pathname
   const collapsed = state === "collapsed"
@@ -96,10 +98,19 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 space-y-2">
+        {user && !collapsed && (
+          <div className="flex items-center gap-2 px-2 py-1 text-xs text-sidebar-foreground/60">
+            <User className="h-3 w-3" />
+            <span className="truncate">{user.email}</span>
+          </div>
+        )}
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="text-sidebar-foreground hover:bg-sidebar-accent/50">
+            <SidebarMenuButton 
+              onClick={signOut}
+              className="text-sidebar-foreground hover:bg-sidebar-accent/50 cursor-pointer"
+            >
               <LogOut className="h-4 w-4" />
               {!collapsed && <span>Sair</span>}
             </SidebarMenuButton>
