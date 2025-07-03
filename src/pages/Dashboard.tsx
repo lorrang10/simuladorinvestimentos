@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import { useAuth } from "@/contexts/AuthContext"
+import { useUserProfile } from "@/hooks/useUserProfile"
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const { profile } = useUserProfile()
   const { simulations, loading } = useInvestmentSimulations()
 
   const formatCurrency = (value: number) => {
@@ -39,9 +41,11 @@ export default function Dashboard() {
   }
 
   const recentSimulations = simulations.slice(0, 3)
+  const firstName = profile?.nome_completo?.split(' ')[0] || 'Usuário'
+  
   return (
     <div className="flex-1 space-y-6 p-6">
-      <Header title="Dashboard" />
+      <Header title={`Olá, ${firstName}!`} />
       
       {/* Cards de Métricas */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
