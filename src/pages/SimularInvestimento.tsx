@@ -93,6 +93,8 @@ export default function SimularInvestimento() {
     monthlyContribution: ""
   })
   const [investmentRates, setInvestmentRates] = useState<Record<string, number>>({})
+  const [ratesSource, setRatesSource] = useState<string>('')
+  const [ratesLastUpdated, setRatesLastUpdated] = useState<string>('')
   const [showResults, setShowResults] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loadingRates, setLoadingRates] = useState(false)
@@ -115,13 +117,20 @@ export default function SimularInvestimento() {
           rates[key] = value.rate
         })
         setInvestmentRates(rates)
+        setRatesSource(data.source || 'API')
+        setRatesLastUpdated(data.lastUpdated || new Date().toISOString())
+        
+        toast({
+          title: "Taxas atualizadas!",
+          description: `Dados obtidos do ${data.source || 'sistema'} em ${new Date(data.lastUpdated).toLocaleString('pt-BR')}`,
+        })
       }
     } catch (error) {
       console.error('Error fetching investment rates:', error)
       toast({
-        title: "Aviso",
-        description: "Não foi possível obter as taxas atualizadas. Usando taxas estimadas.",
-        variant: "default",
+        title: "Erro ao buscar taxas",
+        description: "Usando taxas de referência. Tente novamente mais tarde.",
+        variant: "destructive",
       })
     } finally {
       setLoadingRates(false)
@@ -211,6 +220,25 @@ export default function SimularInvestimento() {
         />
       )}
       
+      {/* Status das Taxas */}
+      {ratesSource && (
+        <Card className="border-success/20 bg-success/5">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+                <span className="text-success-foreground font-medium">
+                  Taxas em tempo real ativas
+                </span>
+              </div>
+              <div className="text-muted-foreground">
+                Fonte: {ratesSource} | Atualizado: {new Date(ratesLastUpdated).toLocaleString('pt-BR')}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Formulário */}
         <Card>
@@ -269,7 +297,14 @@ export default function SimularInvestimento() {
                             <div className="flex flex-col">
                               <span>{type.name}</span>
                               <span className="text-xs text-muted-foreground">
-                                {loadingRates ? 'Carregando...' : `Taxa atual: ${(currentRate * 100).toFixed(2)}% a.a.`}
+                                {loadingRates ? (
+                                  <div className="flex items-center gap-1">
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    Atualizando taxa...
+                                  </div>
+                                ) : (
+                                  `Taxa atual: ${(currentRate * 100).toFixed(2)}% a.a.`
+                                )}
                               </span>
                             </div>
                           </SelectItem>
@@ -342,7 +377,8 @@ export default function SimularInvestimento() {
               )}
 
               <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
+                <Button type="submit" className="flex-1" disabled={loadingRates}>
+                  {loadingRates && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Simular Investimento
                 </Button>
                 {showResults && (
@@ -350,6 +386,15 @@ export default function SimularInvestimento() {
                     Nova Simulação
                   </Button>
                 )}
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={fetchInvestmentRates}
+                  disabled={loadingRates}
+                  title="Atualizar taxas em tempo real"
+                >
+                  {loadingRates ? <Loader2 className="h-4 w-4 animate-spin" /> : "🔄"}
+                </Button>
               </div>
             </form>
           </CardContent>

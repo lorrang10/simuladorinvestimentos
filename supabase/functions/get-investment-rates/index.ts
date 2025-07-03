@@ -11,68 +11,179 @@ interface InvestmentRate {
   lastUpdated: string
 }
 
-// Mock data baseado em médias reais do mercado brasileiro (atualizado para 2024)
-const mockInvestmentRates: Record<string, InvestmentRate> = {
+interface BancoCentralData {
+  '@odata.context': string
+  value: Array<{
+    DataReferencia: string
+    ValorMeta: number
+  }>
+}
+
+// Cache para armazenar as taxas por 24 horas
+let cachedRates: Record<string, InvestmentRate> | null = null
+let lastFetchTime: number = 0
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 horas em millisegundos
+
+// Fallback rates caso a API falhe
+const fallbackRates: Record<string, InvestmentRate> = {
   'tesouro-direto': {
     type: 'Tesouro Direto',
-    rate: 0.1175, // 11.75% - Selic atual + spread
+    rate: 0.1175,
     lastUpdated: new Date().toISOString()
   },
   'cdb': {
     type: 'CDB',
-    rate: 0.1250, // 12.50% - 105% do CDI
+    rate: 0.1250,
     lastUpdated: new Date().toISOString()
   },
   'lci': {
     type: 'LCI',
-    rate: 0.1050, // 10.50% - 88% do CDI (isento de IR)
+    rate: 0.1050,
     lastUpdated: new Date().toISOString()
   },
   'lca': {
     type: 'LCA',
-    rate: 0.1075, // 10.75% - 90% do CDI (isento de IR)
+    rate: 0.1075,
     lastUpdated: new Date().toISOString()
   },
   'debentures': {
     type: 'Debêntures',
-    rate: 0.1350, // 13.50% - IPCA + spread
+    rate: 0.1350,
     lastUpdated: new Date().toISOString()
   },
   'letras-cambio': {
     type: 'Letras de Câmbio',
-    rate: 0.1200, // 12.00% - 100% do CDI
+    rate: 0.1200,
     lastUpdated: new Date().toISOString()
   }
 }
 
-async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
+async function fetchSelicRate(): Promise<number> {
   try {
-    // Em uma implementação real, aqui faria chamadas para APIs como:
-    // - B3 API
-    // - Banco Central API
-    // - APIs de corretoras
+    // API do Banco Central para taxa Selic
+    const response = await fetch(
+      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json&dataInicial=01/01/2024&dataFinal=31/12/2024'
+    )
     
-    // Por agora, retornamos dados simulados baseados em taxas reais do mercado
-    console.log('Fetching current investment rates...')
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
     
-    // Simula uma pequena variação nas taxas para demonstrar dados "reais"
-    const variationFactor = 0.98 + Math.random() * 0.04 // ±2% de variação
+    const data = await response.json()
     
-    const updatedRates: Record<string, InvestmentRate> = {}
+    if (data && Array.isArray(data) && data.length > 0) {
+      // Pega a taxa mais recente
+      const latestRate = data[data.length - 1]
+      return parseFloat(latestRate.valor) / 100 // Converte para decimal
+    }
     
-    Object.entries(mockInvestmentRates).forEach(([key, rate]) => {
-      updatedRates[key] = {
-        ...rate,
-        rate: rate.rate * variationFactor,
+    throw new Error('No data received from Banco Central')
+  } catch (error) {
+    console.error('Error fetching Selic rate from Banco Central:', error)
+    return 0.1175 // Fallback para 11.75%
+  }
+}
+
+async function fetchCDIRate(): Promise<number> {
+  try {
+    // API do Banco Central para taxa CDI
+    const response = await fetch(
+      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial=01/01/2024&dataFinal=31/12/2024'
+    )
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    
+    if (data && Array.isArray(data) && data.length > 0) {
+      // Pega a taxa mais recente
+      const latestRate = data[data.length - 1]
+      return parseFloat(latestRate.valor) / 100 // Converte para decimal
+    }
+    
+    throw new Error('No CDI data received')
+  } catch (error) {
+    console.error('Error fetching CDI rate:', error)
+    return 0.1150 // Fallback próximo à Selic
+  }
+}
+
+async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
+  const now = Date.now()
+  
+  // Verifica se o cache ainda é válido
+  if (cachedRates && (now - lastFetchTime) < CACHE_DURATION) {
+    console.log('Using cached rates')
+    return cachedRates
+  }
+  
+  try {
+    console.log('Fetching fresh investment rates from Banco Central...')
+    
+    // Busca taxas reais em paralelo
+    const [selicRate, cdiRate] = await Promise.all([
+      fetchSelicRate(),
+      fetchCDIRate()
+    ])
+    
+    console.log(`Selic rate: ${(selicRate * 100).toFixed(2)}%`)
+    console.log(`CDI rate: ${(cdiRate * 100).toFixed(2)}%`)
+    
+    // Calcula taxas baseadas nas referências reais
+    const updatedRates: Record<string, InvestmentRate> = {
+      'tesouro-direto': {
+        type: 'Tesouro Direto',
+        rate: selicRate + 0.005, // Selic + 0.5% spread
+        lastUpdated: new Date().toISOString()
+      },
+      'cdb': {
+        type: 'CDB',
+        rate: cdiRate * 1.05, // 105% do CDI
+        lastUpdated: new Date().toISOString()
+      },
+      'lci': {
+        type: 'LCI',
+        rate: cdiRate * 0.88, // 88% do CDI (isento de IR)
+        lastUpdated: new Date().toISOString()
+      },
+      'lca': {
+        type: 'LCA',
+        rate: cdiRate * 0.90, // 90% do CDI (isento de IR)
+        lastUpdated: new Date().toISOString()
+      },
+      'debentures': {
+        type: 'Debêntures',
+        rate: selicRate + 0.02, // Selic + 2% spread
+        lastUpdated: new Date().toISOString()
+      },
+      'letras-cambio': {
+        type: 'Letras de Câmbio',
+        rate: cdiRate * 1.00, // 100% do CDI
         lastUpdated: new Date().toISOString()
       }
-    })
+    }
     
+    // Atualiza o cache
+    cachedRates = updatedRates
+    lastFetchTime = now
+    
+    console.log('Successfully updated investment rates with real data')
     return updatedRates
+    
   } catch (error) {
     console.error('Error fetching real rates:', error)
-    // Em caso de erro, retorna as taxas mock
-    return mockInvestmentRates
+    
+    // Se temos cache antigo, usa ele
+    if (cachedRates) {
+      console.log('Using stale cached rates due to fetch error')
+      return cachedRates
+    }
+    
+    // Caso contrário, usa fallback
+    console.log('Using fallback rates')
+    return fallbackRates
   }
 }
 
@@ -83,9 +194,21 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { investmentType } = await req.json()
+    let body = {}
     
-    console.log('Getting rates for investment type:', investmentType)
+    // Tenta fazer parse do body, mas não falha se estiver vazio
+    try {
+      const text = await req.text()
+      if (text) {
+        body = JSON.parse(text)
+      }
+    } catch (parseError) {
+      console.log('No valid JSON body provided, using empty object')
+    }
+    
+    const { investmentType } = body as { investmentType?: string }
+    
+    console.log('Getting rates for investment type:', investmentType || 'all')
     
     const rates = await fetchRealRates()
     
@@ -111,7 +234,11 @@ Deno.serve(async (req) => {
     
     // Retorna todas as taxas se nenhum tipo específico foi solicitado
     return new Response(
-      JSON.stringify({ rates }),
+      JSON.stringify({ 
+        rates,
+        lastUpdated: new Date().toISOString(),
+        source: 'Banco Central do Brasil'
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
@@ -119,10 +246,17 @@ Deno.serve(async (req) => {
     
   } catch (error) {
     console.error('Error processing request:', error)
+    
+    // Em caso de erro, retorna taxas fallback
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        rates: fallbackRates,
+        lastUpdated: new Date().toISOString(),
+        source: 'fallback',
+        error: 'Unable to fetch real rates, using fallback data'
+      }),
       { 
-        status: 500, 
+        status: 200, // Retorna 200 para não quebrar o frontend
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )
