@@ -11,9 +11,13 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
+import { usePasswordChange } from "@/hooks/usePasswordChange"
+import { supabase } from "@/integrations/supabase/client"
 import { Loader2 } from "lucide-react"
 
 const profileSchema = z.object({
@@ -28,9 +32,15 @@ type ProfileForm = z.infer<typeof profileSchema>
 
 export default function Configuracoes() {
   const [loading, setLoading] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const { toast } = useToast()
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const { profile, updateProfile } = useUserProfile()
+  const { deleteSimulation, simulations } = useInvestmentSimulations()
+  const { changePassword } = usePasswordChange()
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -71,6 +81,102 @@ export default function Configuracoes() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handlePasswordChange = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos de senha",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A nova senha deve ter pelo menos 6 caracteres",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setPasswordLoading(true)
+    const result = await changePassword(currentPassword, newPassword)
+    
+    if (result.success) {
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+    }
+    setPasswordLoading(false)
+  }
+
+  const handleDeleteAllSimulations = async () => {
+    try {
+      const deletePromises = simulations.map(sim => deleteSimulation(sim.id))
+      await Promise.all(deletePromises)
+      
+      toast({
+        title: "Simulações excluídas",
+        description: "Todas as simulações foram excluídas com sucesso",
+      })
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir as simulações",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      // Primeiro excluir todas as simulações
+      const deletePromises = simulations.map(sim => deleteSimulation(sim.id))
+      await Promise.all(deletePromises)
+
+      // Depois excluir o perfil do usuário
+      if (profile?.id) {
+        const { error } = await supabase
+          .from('user_profiles')
+          .delete()
+          .eq('id', profile.id)
+
+        if (error) throw error
+      }
+
+      // Por último, excluir a conta do usuário
+      const { error: deleteUserError } = await supabase.auth.admin.deleteUser(user?.id || '')
+      
+      if (deleteUserError) {
+        console.error('Erro ao excluir usuário:', deleteUserError)
+      }
+
+      // Fazer logout
+      await signOut()
+      
+      toast({
+        title: "Conta excluída",
+        description: "Sua conta foi excluída com sucesso",
+      })
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a conta",
+        variant: "destructive",
+      })
     }
   }
 
@@ -307,17 +413,41 @@ export default function Configuracoes() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Senha Atual</Label>
-              <Input id="currentPassword" type="password" />
+              <Input 
+                id="currentPassword" 
+                type="password" 
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Digite sua senha atual"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="newPassword">Nova Senha</Label>
-              <Input id="newPassword" type="password" />
+              <Input 
+                id="newPassword" 
+                type="password" 
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Digite a nova senha"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
-              <Input id="confirmPassword" type="password" />
+              <Input 
+                id="confirmPassword" 
+                type="password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirme a nova senha"
+              />
             </div>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={handlePasswordChange}
+              disabled={passwordLoading}
+            >
+              {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Alterar Senha
             </Button>
             <Separator />
@@ -348,12 +478,33 @@ export default function Configuracoes() {
             <div>
               <h4 className="font-medium">Excluir todas as simulações</h4>
               <p className="text-sm text-muted-foreground">
-                Remove permanentemente todas as suas simulações
+                Remove permanentemente todas as suas simulações ({simulations.length} simulações)
               </p>
             </div>
-            <Button variant="outline" size="sm" className="text-danger border-danger hover:bg-danger hover:text-danger-foreground">
-              Excluir Simulações
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-danger border-danger hover:bg-danger hover:text-danger-foreground">
+                  Excluir Simulações
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir todas as simulações?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Isso excluirá permanentemente todas as suas {simulations.length} simulações.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteAllSimulations}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Excluir Simulações
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <Separator />
           <div className="flex items-center justify-between">
@@ -363,9 +514,30 @@ export default function Configuracoes() {
                 Remove permanentemente sua conta e todos os dados
               </p>
             </div>
-            <Button variant="destructive" size="sm">
-              Excluir Conta
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  Excluir Conta
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir conta permanentemente?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta, todas as simulações e removerá todos os seus dados dos nossos servidores.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDeleteAccount}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Excluir Conta
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>
