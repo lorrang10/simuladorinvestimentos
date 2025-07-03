@@ -60,9 +60,9 @@ const fallbackRates: Record<string, InvestmentRate> = {
 
 async function fetchSelicRate(): Promise<number> {
   try {
-    // API do Banco Central para taxa Selic
+    // API do Banco Central para taxa Selic (meta)
     const response = await fetch(
-      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json&dataInicial=01/01/2024&dataFinal=31/12/2024'
+      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json'
     )
     
     if (!response.ok) {
@@ -72,9 +72,11 @@ async function fetchSelicRate(): Promise<number> {
     const data = await response.json()
     
     if (data && Array.isArray(data) && data.length > 0) {
-      // Pega a taxa mais recente
-      const latestRate = data[data.length - 1]
-      return parseFloat(latestRate.valor) / 100 // Converte para decimal
+      // Pega a taxa mais recente e converte corretamente
+      const latestRate = data[0]
+      const rateValue = parseFloat(latestRate.valor) / 100 // API retorna em %
+      console.log(`Selic rate from API: ${latestRate.valor}% -> ${rateValue}`)
+      return rateValue
     }
     
     throw new Error('No data received from Banco Central')
@@ -86,9 +88,9 @@ async function fetchSelicRate(): Promise<number> {
 
 async function fetchCDIRate(): Promise<number> {
   try {
-    // API do Banco Central para taxa CDI
+    // API do Banco Central para taxa CDI (série 12)
     const response = await fetch(
-      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados?formato=json&dataInicial=01/01/2024&dataFinal=31/12/2024'
+      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.12/dados/ultimos/1?formato=json'
     )
     
     if (!response.ok) {
@@ -98,9 +100,11 @@ async function fetchCDIRate(): Promise<number> {
     const data = await response.json()
     
     if (data && Array.isArray(data) && data.length > 0) {
-      // Pega a taxa mais recente
-      const latestRate = data[data.length - 1]
-      return parseFloat(latestRate.valor) / 100 // Converte para decimal
+      // Pega a taxa mais recente e converte corretamente
+      const latestRate = data[0]
+      const rateValue = parseFloat(latestRate.valor) / 100 // API retorna em %
+      console.log(`CDI rate from API: ${latestRate.valor}% -> ${rateValue}`)
+      return rateValue
     }
     
     throw new Error('No CDI data received')
@@ -119,7 +123,7 @@ async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
     return cachedRates
   }
   
-  try {
+    try {
     console.log('Fetching fresh investment rates from Banco Central...')
     
     // Busca taxas reais em paralelo
@@ -131,39 +135,57 @@ async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
     console.log(`Selic rate: ${(selicRate * 100).toFixed(2)}%`)
     console.log(`CDI rate: ${(cdiRate * 100).toFixed(2)}%`)
     
-    // Calcula taxas baseadas nas referências reais
+    // Valida se as taxas estão em uma faixa razoável (entre 0.5% e 25%)
+    const isValidRate = (rate: number) => rate >= 0.005 && rate <= 0.25
+    
+    const validSelicRate = isValidRate(selicRate) ? selicRate : 0.1175
+    const validCdiRate = isValidRate(cdiRate) ? cdiRate : 0.1150
+    
+    if (!isValidRate(selicRate)) {
+      console.warn(`Invalid Selic rate ${selicRate}, using fallback`)
+    }
+    if (!isValidRate(cdiRate)) {
+      console.warn(`Invalid CDI rate ${cdiRate}, using fallback`)
+    }
+    
+    // Calcula taxas baseadas nas referências reais e validadas
     const updatedRates: Record<string, InvestmentRate> = {
       'tesouro-direto': {
         type: 'Tesouro Direto',
-        rate: selicRate + 0.005, // Selic + 0.5% spread
+        rate: validSelicRate + 0.005, // Selic + 0.5% spread
         lastUpdated: new Date().toISOString()
       },
       'cdb': {
         type: 'CDB',
-        rate: cdiRate * 1.05, // 105% do CDI
+        rate: validCdiRate * 1.05, // 105% do CDI
         lastUpdated: new Date().toISOString()
       },
       'lci': {
         type: 'LCI',
-        rate: cdiRate * 0.88, // 88% do CDI (isento de IR)
+        rate: validCdiRate * 0.88, // 88% do CDI (isento de IR)
         lastUpdated: new Date().toISOString()
       },
       'lca': {
         type: 'LCA',
-        rate: cdiRate * 0.90, // 90% do CDI (isento de IR)
+        rate: validCdiRate * 0.90, // 90% do CDI (isento de IR)
         lastUpdated: new Date().toISOString()
       },
       'debentures': {
         type: 'Debêntures',
-        rate: selicRate + 0.02, // Selic + 2% spread
+        rate: validSelicRate + 0.02, // Selic + 2% spread
         lastUpdated: new Date().toISOString()
       },
       'letras-cambio': {
         type: 'Letras de Câmbio',
-        rate: cdiRate * 1.00, // 100% do CDI
+        rate: validCdiRate * 1.00, // 100% do CDI
         lastUpdated: new Date().toISOString()
       }
     }
+    
+    // Log das taxas finais para debug
+    Object.entries(updatedRates).forEach(([key, rate]) => {
+      console.log(`${rate.type}: ${(rate.rate * 100).toFixed(2)}%`)
+    })
     
     // Atualiza o cache
     cachedRates = updatedRates
