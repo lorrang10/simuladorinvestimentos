@@ -14,6 +14,12 @@ export function useUserProfile() {
   const { toast } = useToast()
 
   const isPremium = profile?.plano_assinatura === 'premium'
+  const isProfileComplete = profile && 
+    profile.nome_completo && 
+    profile.telefone && 
+    profile.data_nascimento && 
+    profile.perfil_risco && 
+    profile.objetivo_investimento
 
   const fetchProfile = async () => {
     if (!user) return
@@ -89,6 +95,7 @@ export function useUserProfile() {
     profile,
     loading,
     isPremium,
+    isProfileComplete,
     fetchProfile,
     updateProfile,
   }

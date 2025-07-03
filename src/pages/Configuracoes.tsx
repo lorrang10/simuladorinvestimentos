@@ -1,3 +1,7 @@
+import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { Header } from "@/components/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -6,16 +10,68 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/AuthContext"
+import { useUserProfile } from "@/hooks/useUserProfile"
+import { Loader2 } from "lucide-react"
+
+const profileSchema = z.object({
+  nome_completo: z.string().min(1, "Nome completo é obrigatório"),
+  telefone: z.string().min(1, "Telefone é obrigatório"),
+  data_nascimento: z.string().min(1, "Data de nascimento é obrigatória"),
+  perfil_risco: z.enum(["conservador", "moderado", "arrojado"]),
+  objetivo_investimento: z.enum(["aposentadoria", "casa_propria", "educacao", "emergencia", "outros"]),
+})
+
+type ProfileForm = z.infer<typeof profileSchema>
 
 export default function Configuracoes() {
+  const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
+  const { profile, updateProfile } = useUserProfile()
 
-  const handleSave = () => {
-    toast({
-      title: "Configurações salvas",
-      description: "Suas preferências foram atualizadas com sucesso",
-    })
+  const form = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      nome_completo: "",
+      telefone: "",
+      data_nascimento: "",
+      perfil_risco: "moderado",
+      objetivo_investimento: "aposentadoria",
+    },
+  })
+
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        nome_completo: profile.nome_completo || "",
+        telefone: profile.telefone || "",
+        data_nascimento: profile.data_nascimento || "",
+        perfil_risco: (profile.perfil_risco as "conservador" | "moderado" | "arrojado") || "moderado",
+        objetivo_investimento: (profile.objetivo_investimento as "aposentadoria" | "casa_propria" | "educacao" | "emergencia" | "outros") || "aposentadoria",
+      })
+    }
+  }, [profile, form])
+
+  const onSubmit = async (data: ProfileForm) => {
+    setLoading(true)
+    try {
+      await updateProfile(data)
+      toast({
+        title: "Perfil atualizado!",
+        description: "Suas informações foram salvas com sucesso",
+      })
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o perfil",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -31,32 +87,110 @@ export default function Configuracoes() {
               Gerencie suas informações pessoais
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome Completo</Label>
-              <Input id="name" defaultValue="João da Silva" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" defaultValue="joao@exemplo.com" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
-              <Input id="phone" defaultValue="(11) 99999-9999" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="investorProfile">Perfil de Investidor</Label>
-              <Select defaultValue="moderado">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="conservador">Conservador</SelectItem>
-                  <SelectItem value="moderado">Moderado</SelectItem>
-                  <SelectItem value="arrojado">Arrojado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="nome_completo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome Completo</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Seu nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" value={user?.email || ""} disabled />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="telefone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="(11) 99999-9999" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="data_nascimento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Nascimento</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="perfil_risco"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Perfil de Risco</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="conservador">Conservador</SelectItem>
+                          <SelectItem value="moderado">Moderado</SelectItem>
+                          <SelectItem value="arrojado">Arrojado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="objetivo_investimento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Objetivo de Investimento</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="aposentadoria">Aposentadoria</SelectItem>
+                          <SelectItem value="casa_propria">Casa Própria</SelectItem>
+                          <SelectItem value="educacao">Educação</SelectItem>
+                          <SelectItem value="emergencia">Reserva de Emergência</SelectItem>
+                          <SelectItem value="outros">Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Perfil
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
 
@@ -200,15 +334,6 @@ export default function Configuracoes() {
         </Card>
       </div>
 
-      {/* Botões de Ação */}
-      <div className="flex gap-4">
-        <Button onClick={handleSave} className="flex-1 md:flex-none">
-          Salvar Configurações
-        </Button>
-        <Button variant="outline" className="flex-1 md:flex-none">
-          Cancelar
-        </Button>
-      </div>
 
       {/* Zona de Perigo */}
       <Card className="border-danger">

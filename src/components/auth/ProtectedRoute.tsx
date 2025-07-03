@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
 import { AuthForm } from "./AuthForm"
+import { PersonalDataForm } from "./PersonalDataForm"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PremiumFeatureLock } from "@/components/premium/PremiumBanner"
 
@@ -11,7 +12,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiresPremium = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
-  const { isPremium, loading: profileLoading } = useUserProfile()
+  const { isPremium, isProfileComplete, loading: profileLoading, fetchProfile } = useUserProfile()
 
   if (loading || profileLoading) {
     return (
@@ -27,6 +28,10 @@ export function ProtectedRoute({ children, requiresPremium = false }: ProtectedR
 
   if (!user) {
     return <AuthForm />
+  }
+
+  if (user && !isProfileComplete) {
+    return <PersonalDataForm onComplete={fetchProfile} />
   }
 
   if (requiresPremium && !isPremium) {
