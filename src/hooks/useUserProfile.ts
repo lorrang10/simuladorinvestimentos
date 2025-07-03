@@ -53,15 +53,20 @@ export function useUserProfile() {
     if (!user) return null
 
     try {
+      const upsertData: any = {
+        user_id: user.id,
+        ...profileData,
+        updated_at: new Date().toISOString(),
+      }
+
+      // Se já existe um perfil, incluir o ID para garantir que seja um update
+      if (profile?.id) {
+        upsertData.id = profile.id
+      }
+
       const { data, error } = await supabase
         .from('user_profiles')
-        .upsert([
-          {
-            user_id: user.id,
-            ...profileData,
-            updated_at: new Date().toISOString(),
-          }
-        ])
+        .upsert([upsertData])
         .select()
         .single()
 
