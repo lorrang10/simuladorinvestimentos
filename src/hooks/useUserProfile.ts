@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase, UserProfile } from '@/lib/supabase'
+import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import type { Tables, TablesInsert } from '@/integrations/supabase/types'
+
+type UserProfile = Tables<'user_profiles'>
+type UserProfileInsert = TablesInsert<'user_profiles'>
 
 export function useUserProfile() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -37,7 +41,7 @@ export function useUserProfile() {
     }
   }
 
-  const updateProfile = async (profileData: Partial<Omit<UserProfile, 'id' | 'user_id' | 'created_at'>>) => {
+  const updateProfile = async (profileData: Partial<Omit<UserProfileInsert, 'id' | 'user_id' | 'created_at'>>) => {
     if (!user) return null
 
     try {
