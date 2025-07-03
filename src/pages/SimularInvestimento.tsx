@@ -11,6 +11,8 @@ import { MetricCard } from "@/components/metric-card"
 import { TrendingUp, DollarSign, Calendar, Percent, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
+import { useUserProfile } from "@/hooks/useUserProfile"
+import { PremiumBanner } from "@/components/premium/PremiumBanner"
 
 interface SimulationForm {
   name: string
@@ -25,6 +27,7 @@ interface SimulationForm {
 export default function SimularInvestimento() {
   const { toast } = useToast()
   const { createSimulation } = useInvestmentSimulations()
+  const { isPremium } = useUserProfile()
   const [form, setForm] = useState<SimulationForm>({
     name: "",
     type: "",
@@ -104,6 +107,18 @@ export default function SimularInvestimento() {
   return (
     <div className="flex-1 space-y-6 p-6">
       <Header title="Simular Investimento" />
+      
+      {!isPremium && (
+        <PremiumBanner 
+          variant="compact" 
+          onUpgrade={() => {
+            toast({
+              title: "Upgrade para Premium",
+              description: "Funcionalidade em desenvolvimento",
+            })
+          }}
+        />
+      )}
       
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Formulário */}
@@ -298,26 +313,47 @@ export default function SimularInvestimento() {
                       </div>
                     )}
                   </div>
-                  <Button 
-                    className="w-full" 
-                    onClick={async () => {
-                      setSaving(true)
-                      await createSimulation({
-                        nome: form.name,
-                        valor_inicial: initialValueNum,
-                        valor_mensal: monthlyContributionNum,
-                        taxa_juros: annualReturn,
-                        periodo_anos: years,
-                        valor_final: finalValue,
-                        rendimento_total: profit,
-                      })
-                      setSaving(false)
-                    }}
-                    disabled={saving}
-                  >
-                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Salvar Simulação
-                  </Button>
+                  {isPremium ? (
+                    <Button 
+                      className="w-full" 
+                      onClick={async () => {
+                        setSaving(true)
+                        await createSimulation({
+                          nome: form.name,
+                          valor_inicial: initialValueNum,
+                          valor_mensal: monthlyContributionNum,
+                          taxa_juros: annualReturn,
+                          periodo_anos: years,
+                          valor_final: finalValue,
+                          rendimento_total: profit,
+                        })
+                        setSaving(false)
+                      }}
+                      disabled={saving}
+                    >
+                      {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Salvar Simulação
+                    </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <Button 
+                        className="w-full" 
+                        variant="outline"
+                        disabled
+                      >
+                        Salvar Simulação (Premium)
+                      </Button>
+                      <PremiumBanner 
+                        variant="detailed"
+                        onUpgrade={() => {
+                          toast({
+                            title: "Upgrade para Premium",
+                            description: "Funcionalidade em desenvolvimento",
+                          })
+                        }}
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </>

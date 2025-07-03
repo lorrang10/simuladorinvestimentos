@@ -29,9 +29,17 @@ const App = () => (
                 <AppSidebar />
                 <main className="flex-1 overflow-auto">
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/" element={
+                      <ProtectedRoute requiresPremium={true}>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/simular" element={<SimularInvestimento />} />
-                    <Route path="/historico" element={<MeusInvestimentos />} />
+                    <Route path="/historico" element={
+                      <ProtectedRoute requiresPremium={true}>
+                        <MeusInvestimentos />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/configuracoes" element={<Configuracoes />} />
                     <Route path="/ajuda" element={<Ajuda />} />
                     <Route path="*" element={<NotFound />} />

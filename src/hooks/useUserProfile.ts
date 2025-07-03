@@ -13,6 +13,8 @@ export function useUserProfile() {
   const { user } = useAuth()
   const { toast } = useToast()
 
+  const isPremium = profile?.plano_assinatura === 'premium'
+
   const fetchProfile = async () => {
     if (!user) return
 
@@ -86,6 +88,7 @@ export function useUserProfile() {
   return {
     profile,
     loading,
+    isPremium,
     fetchProfile,
     updateProfile,
   }

@@ -56,6 +56,7 @@ export type Database = {
           nome_completo: string | null
           objetivo_investimento: string | null
           perfil_risco: string | null
+          plano_assinatura: string | null
           telefone: string | null
           updated_at: string | null
           user_id: string | null
@@ -67,6 +68,7 @@ export type Database = {
           nome_completo?: string | null
           objetivo_investimento?: string | null
           perfil_risco?: string | null
+          plano_assinatura?: string | null
           telefone?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           nome_completo?: string | null
           objetivo_investimento?: string | null
           perfil_risco?: string | null
+          plano_assinatura?: string | null
           telefone?: string | null
           updated_at?: string | null
           user_id?: string | null

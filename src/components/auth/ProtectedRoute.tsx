@@ -1,15 +1,19 @@
 import { useAuth } from "@/contexts/AuthContext"
+import { useUserProfile } from "@/hooks/useUserProfile"
 import { AuthForm } from "./AuthForm"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PremiumFeatureLock } from "@/components/premium/PremiumBanner"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
+  requiresPremium?: boolean
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requiresPremium = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
+  const { isPremium, loading: profileLoading } = useUserProfile()
 
-  if (loading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="space-y-4 w-full max-w-md">
@@ -23,6 +27,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return <AuthForm />
+  }
+
+  if (requiresPremium && !isPremium) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <PremiumFeatureLock feature="Esta página" />
+        </div>
+      </div>
+    )
   }
 
   return <>{children}</>

@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { BarChart, Home, FolderOpen, Settings, HelpCircle, LogOut, User } from "lucide-react"
+import { BarChart, Home, FolderOpen, Settings, HelpCircle, LogOut, User, Crown } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { useUserProfile } from "@/hooks/useUserProfile"
 
 import {
   Sidebar,
@@ -17,9 +18,9 @@ import {
 } from "@/components/ui/sidebar"
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Simular Investimento", url: "/simular", icon: BarChart },
-  { title: "Meus Investimentos", url: "/historico", icon: FolderOpen },
+  { title: "Dashboard", url: "/", icon: Home, premium: true },
+  { title: "Simular Investimento", url: "/simular", icon: BarChart, premium: false },
+  { title: "Meus Investimentos", url: "/historico", icon: FolderOpen, premium: true },
 ]
 
 const bottomItems = [
@@ -30,6 +31,7 @@ const bottomItems = [
 export function AppSidebar() {
   const { state } = useSidebar()
   const { user, signOut } = useAuth()
+  const { isPremium } = useUserProfile()
   const location = useLocation()
   const currentPath = location.pathname
   const collapsed = state === "collapsed"
@@ -69,9 +71,31 @@ export function AppSidebar() {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
+                    <NavLink 
+                      to={item.premium && !isPremium ? "#" : item.url} 
+                      end 
+                      className={({ isActive }) => {
+                        const baseClasses = getNavCls({ isActive });
+                        if (item.premium && !isPremium) {
+                          return `${baseClasses} opacity-50 cursor-not-allowed`;
+                        }
+                        return baseClasses;
+                      }}
+                      onClick={(e) => {
+                        if (item.premium && !isPremium) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && (
+                        <div className="flex items-center justify-between w-full">
+                          <span>{item.title}</span>
+                          {item.premium && !isPremium && (
+                            <Crown className="h-3 w-3 text-primary" />
+                          )}
+                        </div>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
