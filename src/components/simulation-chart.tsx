@@ -5,10 +5,17 @@ type InvestmentSimulation = Tables<'investment_simulations'>
 
 interface SimulationChartProps {
   className?: string
-  simulations: InvestmentSimulation[]
+  simulations?: InvestmentSimulation[]
+  // Props para simulação ao vivo
+  liveSimulation?: {
+    valorInicial: number
+    valorMensal: number
+    taxaJuros: number
+    periodoAnos: number
+  }
 }
 
-export function SimulationChart({ className, simulations }: SimulationChartProps) {
+export function SimulationChart({ className, simulations, liveSimulation }: SimulationChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -16,15 +23,37 @@ export function SimulationChart({ className, simulations }: SimulationChartProps
     }).format(value)
   }
 
-  // Gera dados do gráfico baseado na simulação mais recente
+  // Gera dados do gráfico baseado na simulação (salva ou ao vivo)
   const generateChartData = () => {
-    if (simulations.length === 0) {
+    let simulationData
+    
+    if (liveSimulation) {
+      // Usa dados da simulação ao vivo
+      simulationData = {
+        valor_inicial: liveSimulation.valorInicial,
+        valor_mensal: liveSimulation.valorMensal,
+        taxa_juros: liveSimulation.taxaJuros,
+        periodo_anos: liveSimulation.periodoAnos
+      }
+    } else if (simulations && simulations.length > 0) {
+      // Usa simulação mais recente
+      const latestSimulation = simulations[0]
+      simulationData = {
+        valor_inicial: latestSimulation.valor_inicial,
+        valor_mensal: latestSimulation.valor_mensal || 0,
+        taxa_juros: latestSimulation.taxa_juros,
+        periodo_anos: latestSimulation.periodo_anos
+      }
+    } else {
       return []
     }
 
-    // Pega a simulação mais recente
-    const latestSimulation = simulations[0]
-    const { valor_inicial, valor_mensal, taxa_juros, periodo_anos } = latestSimulation
+    const { valor_inicial, valor_mensal, taxa_juros, periodo_anos } = simulationData
+    
+    // Validações básicas
+    if (!valor_inicial || !taxa_juros || !periodo_anos) {
+      return []
+    }
     
     const monthlyRate = taxa_juros / 12
     const totalMonths = periodo_anos * 12
@@ -43,10 +72,10 @@ export function SimulationChart({ className, simulations }: SimulationChartProps
     // Calcula mês a mês
     for (let month = 1; month <= totalMonths; month++) {
       // Adiciona aporte mensal
-      valorInvestido += (valor_mensal || 0)
+      valorInvestido += valor_mensal
       
       // Aplica rendimento
-      valorTotal = valorTotal * (1 + monthlyRate) + (valor_mensal || 0)
+      valorTotal = valorTotal * (1 + monthlyRate) + valor_mensal
 
       chartData.push({
         month,
@@ -64,7 +93,7 @@ export function SimulationChart({ className, simulations }: SimulationChartProps
     return (
       <div className={className}>
         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-          <p>Nenhuma simulação disponível para exibir</p>
+          <p>Preencha os dados para visualizar a projeção</p>
         </div>
       </div>
     )

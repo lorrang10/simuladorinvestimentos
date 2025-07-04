@@ -453,7 +453,14 @@ export default function SimularInvestimento() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <SimulationChart simulations={simulations} />
+                  <SimulationChart 
+                    liveSimulation={{
+                      valorInicial: initialValueNum,
+                      valorMensal: monthlyContributionNum,
+                      taxaJuros: annualReturn,
+                      periodoAnos: years
+                    }}
+                  />
                 </CardContent>
               </Card>
 
