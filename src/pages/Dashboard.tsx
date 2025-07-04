@@ -6,10 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
 import { useState } from "react"
+import type { Tables } from '@/integrations/supabase/types'
+
+type InvestmentSimulation = Tables<'investment_simulations'>
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -44,6 +48,94 @@ export default function Dashboard() {
 
   const recentSimulations = simulations.slice(0, 3)
   const firstName = profile?.nome_completo?.split(' ')[0] || 'Usuário'
+
+  // Componente para exibir detalhes da simulação
+  const SimulationDetailsModal = ({ simulation }: { simulation: InvestmentSimulation }) => {
+    const formatPercentage = (value: number) => {
+      return `${(value * 100).toFixed(2)}%`
+    }
+
+    const totalInvestido = simulation.valor_inicial + ((simulation.valor_mensal || 0) * 12 * simulation.periodo_anos)
+    const lucroObtido = simulation.valor_final - totalInvestido
+
+    return (
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{simulation.nome}</DialogTitle>
+          <DialogDescription>
+            Detalhes completos da simulação realizada em {formatDate(simulation.created_at || '')}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid gap-6">
+          {/* Informações Principais */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">Valores Investidos</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Valor Inicial:</span>
+                  <span className="font-medium">{formatCurrency(simulation.valor_inicial)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Aporte Mensal:</span>
+                  <span className="font-medium">{formatCurrency(simulation.valor_mensal || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Investido:</span>
+                  <span className="font-medium">{formatCurrency(totalInvestido)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">Configurações</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Período:</span>
+                  <span className="font-medium">{simulation.periodo_anos} anos</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Taxa de Juros:</span>
+                  <span className="font-medium">{formatPercentage(simulation.taxa_juros)} a.a.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Resultados */}
+          <div className="border-t pt-4">
+            <h4 className="font-semibold text-sm mb-3">Resultados da Simulação</h4>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Valor Final</p>
+                <p className="font-bold text-lg text-primary">{formatCurrency(simulation.valor_final)}</p>
+              </div>
+              <div className="text-center p-3 bg-success/10 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Lucro Obtido</p>
+                <p className="font-bold text-lg text-success">{formatCurrency(lucroObtido)}</p>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Rendimento Total</p>
+                <p className="font-bold text-lg">{formatPercentage(simulation.rendimento_total)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Gráfico da simulação */}
+          <div className="border-t pt-4">
+            <h4 className="font-semibold text-sm mb-3">Evolução do Investimento</h4>
+            <div className="h-[250px]">
+              <SimulationChart 
+                simulations={[simulation]} 
+                selectedSimulationId={simulation.id}
+              />
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    )
+  }
   
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -139,14 +231,16 @@ export default function Dashboard() {
               recentSimulations.map((simulation) => (
                 <div 
                   key={simulation.id} 
-                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                  className={`flex items-center justify-between p-3 border rounded-lg transition-colors hover:bg-muted/50 ${
                     selectedSimulation === simulation.id ? 'border-primary bg-primary/5' : ''
                   }`}
-                  onClick={() => setSelectedSimulation(
-                    selectedSimulation === simulation.id ? null : simulation.id
-                  )}
                 >
-                  <div className="space-y-1">
+                  <div 
+                    className="space-y-1 flex-1 cursor-pointer"
+                    onClick={() => setSelectedSimulation(
+                      selectedSimulation === simulation.id ? null : simulation.id
+                    )}
+                  >
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-sm">{simulation.nome}</h4>
                       <Badge variant="default" className="text-xs">Salva</Badge>
@@ -162,6 +256,15 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="sm" className="ml-2">
+                        Detalhes
+                      </Button>
+                    </DialogTrigger>
+                    <SimulationDetailsModal simulation={simulation} />
+                  </Dialog>
                 </div>
               ))
             ) : (
