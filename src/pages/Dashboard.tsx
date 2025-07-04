@@ -107,7 +107,7 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SimulationChart />
+            <SimulationChart simulations={simulations} />
           </CardContent>
         </Card>
 

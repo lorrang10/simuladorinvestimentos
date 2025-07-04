@@ -80,7 +80,7 @@ const investmentCategories: InvestmentCategory[] = [
 
 export default function SimularInvestimento() {
   const { toast } = useToast()
-  const { createSimulation } = useInvestmentSimulations()
+  const { createSimulation, simulations } = useInvestmentSimulations()
   const { isPremium } = useUserProfile()
   const [form, setForm] = useState<SimulationForm>({
     name: "",
@@ -453,7 +453,7 @@ export default function SimularInvestimento() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <SimulationChart />
+                  <SimulationChart simulations={simulations} />
                 </CardContent>
               </Card>
 
