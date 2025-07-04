@@ -6,6 +6,7 @@ type InvestmentSimulation = Tables<'investment_simulations'>
 interface SimulationChartProps {
   className?: string
   simulations?: InvestmentSimulation[]
+  selectedSimulationId?: string | null
   // Props para simulação ao vivo
   liveSimulation?: {
     valorInicial: number
@@ -15,7 +16,7 @@ interface SimulationChartProps {
   }
 }
 
-export function SimulationChart({ className, simulations, liveSimulation }: SimulationChartProps) {
+export function SimulationChart({ className, simulations, selectedSimulationId, liveSimulation }: SimulationChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -36,13 +37,21 @@ export function SimulationChart({ className, simulations, liveSimulation }: Simu
         periodo_anos: liveSimulation.periodoAnos
       }
     } else if (simulations && simulations.length > 0) {
-      // Usa simulação mais recente
-      const latestSimulation = simulations[0]
+      // Usa simulação selecionada ou a mais recente
+      let targetSimulation
+      if (selectedSimulationId) {
+        targetSimulation = simulations.find(sim => sim.id === selectedSimulationId)
+      }
+      
+      if (!targetSimulation) {
+        targetSimulation = simulations[0] // Fallback para a mais recente
+      }
+      
       simulationData = {
-        valor_inicial: latestSimulation.valor_inicial,
-        valor_mensal: latestSimulation.valor_mensal || 0,
-        taxa_juros: latestSimulation.taxa_juros,
-        periodo_anos: latestSimulation.periodo_anos
+        valor_inicial: targetSimulation.valor_inicial,
+        valor_mensal: targetSimulation.valor_mensal || 0,
+        taxa_juros: targetSimulation.taxa_juros,
+        periodo_anos: targetSimulation.periodo_anos
       }
     } else {
       return []

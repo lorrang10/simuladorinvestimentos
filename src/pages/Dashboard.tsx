@@ -9,11 +9,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useState } from "react"
 
 export default function Dashboard() {
   const { user } = useAuth()
   const { profile } = useUserProfile()
   const { simulations, loading } = useInvestmentSimulations()
+  const [selectedSimulation, setSelectedSimulation] = useState<string | null>(null)
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -107,7 +109,10 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <SimulationChart simulations={simulations} />
+            <SimulationChart 
+              simulations={simulations} 
+              selectedSimulationId={selectedSimulation}
+            />
           </CardContent>
         </Card>
 
@@ -132,11 +137,22 @@ export default function Dashboard() {
               </>
             ) : recentSimulations.length > 0 ? (
               recentSimulations.map((simulation) => (
-                <div key={simulation.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div 
+                  key={simulation.id} 
+                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                    selectedSimulation === simulation.id ? 'border-primary bg-primary/5' : ''
+                  }`}
+                  onClick={() => setSelectedSimulation(
+                    selectedSimulation === simulation.id ? null : simulation.id
+                  )}
+                >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-sm">{simulation.nome}</h4>
                       <Badge variant="default" className="text-xs">Salva</Badge>
+                      {selectedSimulation === simulation.id && (
+                        <Badge variant="secondary" className="text-xs">Selecionada</Badge>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground">{simulation.periodo_anos} anos</p>
                     <div className="flex items-center gap-4 text-xs">
@@ -146,9 +162,6 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    Ver Detalhes
-                  </Button>
                 </div>
               ))
             ) : (
