@@ -157,6 +157,15 @@ export default function SimularInvestimento() {
       return
     }
 
+    if (Number(form.duration) <= 0) {
+      toast({
+        title: "Duração inválida",
+        description: "A duração do investimento deve ser um número positivo.",
+        variant: "destructive"
+      })
+      return
+    }
+
     setShowResults(true)
     toast({
       title: "Simulação realizada!",
