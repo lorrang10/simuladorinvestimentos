@@ -93,7 +93,7 @@ export default function Dashboard() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Período:</span>
-                  <span className="font-medium">{simulation.periodo_anos} anos</span>
+                  <span className="font-medium">{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Taxa de Juros:</span>
@@ -248,7 +248,7 @@ export default function Dashboard() {
                         <Badge variant="secondary" className="text-xs">Selecionada</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">{simulation.periodo_anos} anos</p>
+                    <p className="text-xs text-muted-foreground">{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</p>
                     <div className="flex items-center gap-4 text-xs">
                       <span>Inicial: {formatCurrency(simulation.valor_inicial)}</span>
                       <span className="text-success">

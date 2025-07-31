@@ -113,7 +113,7 @@ export default function MeusInvestimentos() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Período:</span>
-                  <span className="font-medium">{simulation.periodo_anos} anos</span>
+                  <span className="font-medium">{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Taxa de Juros:</span>
@@ -279,7 +279,7 @@ export default function MeusInvestimentos() {
                               : "—"
                             }
                           </TableCell>
-                          <TableCell>{simulation.periodo_anos} anos</TableCell>
+                          <TableCell>{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</TableCell>
                           <TableCell>{(simulation.taxa_juros * 100).toFixed(1)}%</TableCell>
                           <TableCell className="text-success font-medium">
                             {formatCurrency(simulation.valor_final)}
