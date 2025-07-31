@@ -13,7 +13,7 @@ import { useUserProfile } from "@/hooks/useUserProfile"
 import { useState } from "react"
 import type { Tables } from '@/integrations/supabase/types'
 
-type InvestmentSimulation = Tables<'investment_simulations'> & { manual_percentage?: number }
+type InvestmentSimulation = Tables<'investment_simulations'>
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -97,7 +97,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Taxa de Juros:</span>
-                  <span className="font-medium">{simulation.manual_percentage ? `${simulation.manual_percentage.toFixed(2).replace(".", ",")}% (Manual)` : `${formatPercentage(simulation.taxa_juros)} a.a.`}</span>
+                  <span className="font-medium">{formatPercentage(simulation.taxa_juros)} a.a.</span>
                 </div>
               </div>
             </div>
@@ -244,11 +244,6 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium text-sm">{simulation.nome}</h4>
                       <Badge variant="default" className="text-xs">Salva</Badge>
-                      {simulation.manual_percentage && (
-                        <Badge variant="outline" className="text-xs">
-                          {simulation.manual_percentage.toFixed(0)}% Manual
-                        </Badge>
-                      )}
                       {selectedSimulation === simulation.id && (
                         <Badge variant="secondary" className="text-xs">Selecionada</Badge>
                       )}

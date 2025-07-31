@@ -24,8 +24,6 @@ interface SimulationForm {
   durationType: string
   hasMonthlyContribution: boolean
   monthlyContribution: string
-  manualPercentage: string
-  useManualPercentage: boolean
 }
 
 interface InvestmentCategory {
@@ -92,9 +90,7 @@ export default function SimularInvestimento() {
     duration: "",
     durationType: "anos",
     hasMonthlyContribution: false,
-    monthlyContribution: "",
-    manualPercentage: "",
-    useManualPercentage: false
+    monthlyContribution: ""
   })
   const [investmentRates, setInvestmentRates] = useState<Record<string, number>>({})
   const [ratesSource, setRatesSource] = useState<string>('')
@@ -186,9 +182,7 @@ export default function SimularInvestimento() {
       duration: "",
       durationType: "anos",
       hasMonthlyContribution: false,
-      monthlyContribution: "",
-      manualPercentage: "",
-      useManualPercentage: false
+      monthlyContribution: ""
     })
     setShowResults(false)
   }
@@ -213,10 +207,8 @@ export default function SimularInvestimento() {
   const duration = Number(form.duration)
   const years = form.durationType === "anos" ? duration : duration / 12
 
-  // Usar taxa real do investimento selecionado ou percentual manual
-  const annualReturn = form.useManualPercentage && Number(form.manualPercentage) > 0
-    ? (Number(form.manualPercentage) / 100) * (form.type ? getCurrentRate(form.type) : 0.12) // Percentual do CDI/taxa base (ex: 120% -> 1.2 * taxa_base)
-    : (form.type ? getCurrentRate(form.type) : 0.12)
+  // Usar taxa real do investimento selecionado
+  const annualReturn = form.type ? getCurrentRate(form.type) : 0.12
   const totalInvested = initialValueNum + (monthlyContributionNum * 12 * years)
   const finalValue = totalInvested * Math.pow(1 + annualReturn, years)
   const profit = finalValue - totalInvested
@@ -393,29 +385,6 @@ export default function SimularInvestimento() {
                 </div>
               )}
 
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="useManualPercentage"
-                  checked={form.useManualPercentage}
-                  onCheckedChange={(checked) => setForm(prev => ({ ...prev, useManualPercentage: checked as boolean }))}
-                />
-                <Label htmlFor="useManualPercentage">Usar Percentual Manual</Label>
-              </div>
-
-              {form.useManualPercentage && (
-                <div className="space-y-2">
-                  <Label htmlFor="manualPercentage">Percentual Manual (%)</Label>
-                  <Input
-                    id="manualPercentage"
-                    type="number"
-                    placeholder="Ex: 120 (para 120% do CDI)"
-                    value={form.manualPercentage}
-                    onChange={(e) => setForm(prev => ({ ...prev, manualPercentage: e.target.value }))}
-                  />
-                </div>
-              )}
-
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1" disabled={loadingRates}>
                   {loadingRates && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -535,12 +504,6 @@ export default function SimularInvestimento() {
                         <p className="font-medium">{formatCurrency(form.monthlyContribution)}</p>
                       </div>
                     )}
-                    {form.useManualPercentage && (
-                      <div className="col-span-2">
-                        <span className="text-muted-foreground">Percentual Manual:</span>
-                        <p className="font-medium">{form.manualPercentage}% da taxa base</p>
-                      </div>
-                    )}
                   </div>
                   {isPremium ? (
                     <Button 
@@ -555,7 +518,6 @@ export default function SimularInvestimento() {
                           periodo_anos: years,
                           valor_final: finalValue,
                           rendimento_total: profit,
-                          manual_percentage: form.useManualPercentage ? Number(form.manualPercentage) : null,
                         })
                         setSaving(false)
                       }}

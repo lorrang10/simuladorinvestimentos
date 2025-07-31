@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import type { Tables } from '@/integrations/supabase/types'
 
-type InvestmentSimulation = Tables<'investment_simulations'> & { manual_percentage?: number }
+type InvestmentSimulation = Tables<'investment_simulations'>
 
 export default function MeusInvestimentos() {
   const { toast } = useToast()
@@ -117,7 +117,7 @@ export default function MeusInvestimentos() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Taxa de Juros:</span>
-                  <span className="font-medium">{simulation.manual_percentage ? `${simulation.manual_percentage.toFixed(2).replace(".", ",")}% (Manual)` : `${formatPercentage(simulation.taxa_juros)} a.a.`}</span>
+                  <span className="font-medium">{formatPercentage(simulation.taxa_juros)} a.a.</span>
                 </div>
               </div>
             </div>
@@ -259,7 +259,6 @@ export default function MeusInvestimentos() {
                     <TableHead>Aportes Mensais</TableHead>
                     <TableHead>Período (anos)</TableHead>
                     <TableHead>Taxa a.a.</TableHead>
-                    <TableHead>Percentual Manual</TableHead>
                     <TableHead>Retorno Final</TableHead>
                     <TableHead>Data</TableHead>
                     <TableHead className="w-12">Ações</TableHead>
@@ -282,12 +281,6 @@ export default function MeusInvestimentos() {
                           </TableCell>
                           <TableCell>{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</TableCell>
                           <TableCell>{(simulation.taxa_juros * 100).toFixed(1)}%</TableCell>
-                          <TableCell>
-                            {simulation.manual_percentage 
-                              ? `${simulation.manual_percentage.toFixed(0)}%`
-                              : "—"
-                            }
-                          </TableCell>
                           <TableCell className="text-success font-medium">
                             {formatCurrency(simulation.valor_final)}
                           </TableCell>
