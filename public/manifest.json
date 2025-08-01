@@ -1,0 +1,22 @@
+{
+  "name": "Simulador de Investimentos",
+  "short_name": "SimuladorInv",
+  "description": "Aplicativo para simulação de investimentos com dados do Banco Central",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1a1a1a",
+  "background_color": "#1a1a1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
