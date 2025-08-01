@@ -24,6 +24,9 @@ interface SimulationForm {
   durationType: string
   hasMonthlyContribution: boolean
   monthlyContribution: string
+  useManualRate: boolean
+  manualPercentage: string
+  indexerType: string
 }
 
 interface InvestmentCategory {
@@ -90,7 +93,10 @@ export default function SimularInvestimento() {
     duration: "",
     durationType: "anos",
     hasMonthlyContribution: false,
-    monthlyContribution: ""
+    monthlyContribution: "",
+    useManualRate: false,
+    manualPercentage: "",
+    indexerType: "CDI"
   })
   const [investmentRates, setInvestmentRates] = useState<Record<string, number>>({})
   const [ratesSource, setRatesSource] = useState<string>('')
@@ -141,6 +147,30 @@ export default function SimularInvestimento() {
   const getCurrentRate = (investmentType: string): number => {
     return investmentRates[investmentType] || 0.12 // fallback para 12%
   }
+  
+  // Função para calcular taxa com percentual manual
+  const calculateManualRate = (percentage: string, indexer: string): number => {
+    const percentageNum = parseFloat(percentage)
+    if (isNaN(percentageNum)) return 0.12
+    
+    let baseRate = 0.12 // taxa padrão
+    
+    switch (indexer) {
+      case 'CDI':
+        baseRate = investmentRates['cdi'] || 0.1075
+        break
+      case 'SELIC':
+        baseRate = investmentRates['selic'] || 0.105
+        break
+      case 'IPCA':
+        baseRate = investmentRates['ipca'] || 0.045
+        break
+      case 'FIXO':
+        return percentageNum / 100
+    }
+    
+    return (baseRate * percentageNum) / 100
+  }
 
   const selectedCategory = investmentCategories.find(cat => cat.id === form.category)
   const availableTypes = selectedCategory?.types || []
@@ -182,7 +212,10 @@ export default function SimularInvestimento() {
       duration: "",
       durationType: "anos",
       hasMonthlyContribution: false,
-      monthlyContribution: ""
+      monthlyContribution: "",
+      useManualRate: false,
+      manualPercentage: "",
+      indexerType: "CDI"
     })
     setShowResults(false)
   }
@@ -207,8 +240,10 @@ export default function SimularInvestimento() {
   const duration = Number(form.duration)
   const years = form.durationType === "anos" ? duration : duration / 12
 
-  // Usar taxa real do investimento selecionado
-  const annualReturn = form.type ? getCurrentRate(form.type) : 0.12
+  // Usar taxa manual ou taxa real do investimento selecionado
+  const annualReturn = form.useManualRate 
+    ? calculateManualRate(form.manualPercentage, form.indexerType)
+    : (form.type ? getCurrentRate(form.type) : 0.12)
   const totalInvested = initialValueNum + (monthlyContributionNum * 12 * years)
   const finalValue = totalInvested * Math.pow(1 + annualReturn, years)
   const profit = finalValue - totalInvested
@@ -328,6 +363,66 @@ export default function SimularInvestimento() {
                   )}
                 </div>
               )}
+
+              {/* Seção de Taxa Manual */}
+              <div className="space-y-3 p-4 border rounded-lg bg-muted/50">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="useManualRate"
+                    checked={form.useManualRate}
+                    onCheckedChange={(checked) => setForm(prev => ({ ...prev, useManualRate: checked as boolean }))}
+                  />
+                  <Label htmlFor="useManualRate" className="text-sm font-medium">
+                    Usar percentual manual (ex: 120% do CDI)
+                  </Label>
+                </div>
+
+                {form.useManualRate && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="manualPercentage">Percentual (%)</Label>
+                      <Input
+                        id="manualPercentage"
+                        type="number"
+                        value={form.manualPercentage}
+                        onChange={(e) => setForm(prev => ({ ...prev, manualPercentage: e.target.value }))}
+                        placeholder="120"
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="indexerType">Indexador</Label>
+                      <Select 
+                        value={form.indexerType} 
+                        onValueChange={(value) => setForm(prev => ({ ...prev, indexerType: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CDI">CDI</SelectItem>
+                          <SelectItem value="SELIC">SELIC</SelectItem>
+                          <SelectItem value="IPCA">IPCA</SelectItem>
+                          <SelectItem value="FIXO">Taxa Fixa</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {form.useManualRate && form.manualPercentage && (
+                  <div className="text-sm text-muted-foreground">
+                    <span>Taxa calculada: </span>
+                    <span className="font-medium text-foreground">
+                      {form.indexerType === 'FIXO' 
+                        ? `${form.manualPercentage}% a.a.`
+                        : `${form.manualPercentage}% do ${form.indexerType} = ${(calculateManualRate(form.manualPercentage, form.indexerType) * 100).toFixed(2)}% a.a.`
+                      }
+                    </span>
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="initialValue">Valor Inicial</Label>
@@ -518,6 +613,8 @@ export default function SimularInvestimento() {
                           periodo_anos: years,
                           valor_final: finalValue,
                           rendimento_total: profit,
+                          percentual_manual: form.useManualRate ? parseFloat(form.manualPercentage) : null,
+                          tipo_indexador: form.useManualRate ? form.indexerType : null,
                         })
                         setSaving(false)
                       }}

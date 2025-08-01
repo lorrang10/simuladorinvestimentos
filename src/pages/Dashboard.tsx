@@ -99,6 +99,17 @@ export default function Dashboard() {
                   <span className="text-muted-foreground">Taxa de Juros:</span>
                   <span className="font-medium">{formatPercentage(simulation.taxa_juros)} a.a.</span>
                 </div>
+                {simulation.percentual_manual && simulation.tipo_indexador && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Taxa Manual:</span>
+                    <span className="font-medium text-primary">
+                      {simulation.tipo_indexador === 'FIXO' 
+                        ? `${simulation.percentual_manual}% a.a.`
+                        : `${simulation.percentual_manual}% do ${simulation.tipo_indexador}`
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -249,6 +260,14 @@ export default function Dashboard() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</p>
+                    {simulation.percentual_manual && simulation.tipo_indexador && (
+                      <p className="text-xs text-primary font-medium">
+                        {simulation.tipo_indexador === 'FIXO' 
+                          ? `${simulation.percentual_manual}% a.a.`
+                          : `${simulation.percentual_manual}% do ${simulation.tipo_indexador}`
+                        }
+                      </p>
+                    )}
                     <div className="flex items-center gap-4 text-xs">
                       <span>Inicial: {formatCurrency(simulation.valor_inicial)}</span>
                       <span className="text-success">

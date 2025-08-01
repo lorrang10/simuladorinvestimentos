@@ -119,6 +119,17 @@ export default function MeusInvestimentos() {
                   <span className="text-muted-foreground">Taxa de Juros:</span>
                   <span className="font-medium">{formatPercentage(simulation.taxa_juros)} a.a.</span>
                 </div>
+                {simulation.percentual_manual && simulation.tipo_indexador && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Taxa Manual:</span>
+                    <span className="font-medium text-primary">
+                      {simulation.tipo_indexador === 'FIXO' 
+                        ? `${simulation.percentual_manual}% a.a.`
+                        : `${simulation.percentual_manual}% do ${simulation.tipo_indexador}`
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -269,8 +280,18 @@ export default function MeusInvestimentos() {
                     <Dialog key={simulation.id}>
                       <DialogTrigger asChild>
                         <TableRow className="cursor-pointer hover:bg-muted/50 transition-colors">
-                          <TableCell className="font-medium">
-                            {simulation.nome}
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{simulation.nome}</span>
+                              {simulation.percentual_manual && simulation.tipo_indexador && (
+                                <span className="text-xs text-primary font-medium">
+                                  {simulation.tipo_indexador === 'FIXO' 
+                                    ? `${simulation.percentual_manual}% a.a.`
+                                    : `${simulation.percentual_manual}% do ${simulation.tipo_indexador}`
+                                  }
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>{formatCurrency(simulation.valor_inicial)}</TableCell>
                           <TableCell>
