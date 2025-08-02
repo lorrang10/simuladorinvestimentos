@@ -79,50 +79,50 @@ export default function MeusInvestimentos() {
     const lucroObtido = simulation.valor_final - totalInvestido
 
     return (
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{simulation.nome}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-base sm:text-lg">{simulation.nome}</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Detalhes completos da simulação realizada em {formatDate(simulation.created_at || '')}
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {/* Informações Principais */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-3">
               <h4 className="font-semibold text-sm">Valores Investidos</h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Valor Inicial:</span>
-                  <span className="font-medium">{formatCurrency(simulation.valor_inicial)}</span>
+                  <span className="font-medium text-right break-all">{formatCurrency(simulation.valor_inicial)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Aporte Mensal:</span>
-                  <span className="font-medium">{formatCurrency(simulation.valor_mensal || 0)}</span>
+                  <span className="font-medium text-right break-all">{formatCurrency(simulation.valor_mensal || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Total Investido:</span>
-                  <span className="font-medium">{formatCurrency(totalInvestido)}</span>
+                  <span className="font-medium text-right break-all">{formatCurrency(totalInvestido)}</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
               <h4 className="font-semibold text-sm">Configurações</h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-2 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Período:</span>
-                  <span className="font-medium">{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</span>
+                  <span className="font-medium text-right">{simulation.periodo_anos.toFixed(2).replace(".", ",")} anos</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Taxa de Juros:</span>
-                  <span className="font-medium">{formatPercentage(simulation.taxa_juros)} a.a.</span>
+                  <span className="font-medium text-right">{formatPercentage(simulation.taxa_juros)} a.a.</span>
                 </div>
                 {simulation.percentual_manual && simulation.tipo_indexador && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Taxa Manual:</span>
-                    <span className="font-medium text-primary">
+                    <span className="font-medium text-primary text-right">
                       {simulation.tipo_indexador === 'FIXO' 
                         ? `${simulation.percentual_manual}% a.a.`
                         : `${simulation.percentual_manual}% do ${simulation.tipo_indexador}`
@@ -137,18 +137,18 @@ export default function MeusInvestimentos() {
           {/* Resultados */}
           <div className="border-t pt-4">
             <h4 className="font-semibold text-sm mb-3">Resultados da Simulação</h4>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-muted/30 rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Valor Final</p>
-                <p className="font-bold text-lg text-primary">{formatCurrency(simulation.valor_final)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg text-primary break-all leading-tight">{formatCurrency(simulation.valor_final)}</p>
               </div>
-              <div className="text-center p-3 bg-success/10 rounded-lg">
+              <div className="text-center p-2 sm:p-3 bg-success/10 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Lucro Obtido</p>
-                <p className="font-bold text-lg text-success">{formatCurrency(lucroObtido)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg text-success break-all leading-tight">{formatCurrency(lucroObtido)}</p>
               </div>
-              <div className="text-center p-3 bg-muted/30 rounded-lg">
+              <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Rendimento Total</p>
-                <p className="font-bold text-lg">{formatPercentage(simulation.rendimento_total)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg break-all leading-tight">{formatPercentage(simulation.rendimento_total)}</p>
               </div>
             </div>
           </div>
@@ -156,7 +156,7 @@ export default function MeusInvestimentos() {
           {/* Gráfico da simulação */}
           <div className="border-t pt-4">
             <h4 className="font-semibold text-sm mb-3">Evolução do Investimento</h4>
-            <div className="h-[250px]">
+            <div className="h-[200px] sm:h-[250px]">
               <SimulationChart 
                 simulations={[simulation]} 
                 selectedSimulationId={simulation.id}
@@ -181,7 +181,7 @@ export default function MeusInvestimentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{simulations.length}</div>
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold break-all leading-tight">{simulations.length}</div>
             <p className="text-xs text-muted-foreground">
               simulações salvas
             </p>
@@ -195,7 +195,7 @@ export default function MeusInvestimentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-success break-all leading-tight">
               {formatCurrency(getTotalValue())}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -211,7 +211,7 @@ export default function MeusInvestimentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold break-all leading-tight">
               {simulations.length > 0 ? formatCurrency(getTotalValue() / simulations.length) : "—"}
             </div>
             <p className="text-xs text-muted-foreground">
