@@ -120,15 +120,15 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Valor Final</p>
-                <p className="font-bold text-base sm:text-lg text-primary break-words">{formatCurrency(simulation.valor_final)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg text-primary break-all leading-tight">{formatCurrency(simulation.valor_final)}</p>
               </div>
               <div className="text-center p-2 sm:p-3 bg-success/10 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Lucro Obtido</p>
-                <p className="font-bold text-base sm:text-lg text-success break-words">{formatCurrency(lucroObtido)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg text-success break-all leading-tight">{formatCurrency(lucroObtido)}</p>
               </div>
               <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Rendimento Total</p>
-                <p className="font-bold text-base sm:text-lg break-words">{formatPercentage(simulation.rendimento_total)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg break-all leading-tight">{formatPercentage(simulation.rendimento_total)}</p>
               </div>
             </div>
           </div>
@@ -269,8 +269,8 @@ export default function Dashboard() {
                       </p>
                     )}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs">
-                      <span className="break-words">Inicial: {formatCurrency(simulation.valor_inicial)}</span>
-                      <span className="text-success break-words">
+                      <span className="break-all leading-tight">Inicial: {formatCurrency(simulation.valor_inicial)}</span>
+                      <span className="text-success break-all leading-tight">
                         Retorno: {formatCurrency(simulation.valor_final)}
                       </span>
                     </div>
