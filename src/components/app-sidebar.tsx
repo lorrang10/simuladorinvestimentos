@@ -2,6 +2,8 @@ import { NavLink, useLocation } from "react-router-dom"
 import { BarChart, Home, FolderOpen, Settings, HelpCircle, LogOut, User, Crown } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { useEffect } from "react"
 
 import {
   Sidebar,
@@ -29,12 +31,20 @@ const bottomItems = [
 ]
 
 export function AppSidebar() {
-  const { state } = useSidebar()
+  const { state, setOpenMobile } = useSidebar()
   const { user, signOut } = useAuth()
   const { isPremium } = useUserProfile()
   const location = useLocation()
   const currentPath = location.pathname
   const collapsed = state === "collapsed"
+  const isMobile = useIsMobile()
+
+  // Fecha o sidebar automaticamente ao navegar em mobile
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }, [currentPath, isMobile, setOpenMobile])
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
