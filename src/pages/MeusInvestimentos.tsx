@@ -148,7 +148,7 @@ export default function MeusInvestimentos() {
               </div>
               <div className="text-center p-2 sm:p-3 bg-muted/30 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">Rendimento Total</p>
-                <p className="font-bold text-sm sm:text-base lg:text-lg break-all leading-tight">{formatPercentage(simulation.rendimento_total)}</p>
+                <p className="font-bold text-sm sm:text-base lg:text-lg break-all leading-tight">{(((simulation.valor_final / totalInvestido) - 1) * 100).toFixed(2)}%</p>
               </div>
             </div>
           </div>
