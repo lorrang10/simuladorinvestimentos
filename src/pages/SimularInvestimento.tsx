@@ -540,7 +540,7 @@ export default function SimularInvestimento() {
                 />
                 <MetricCard
                   title="Rendimento Total"
-                  value={`${(((finalValue - totalInvested) / totalInvested) * 100).toFixed(2)}%`}
+                  value={`${(((finalValue / totalInvested) - 1) * 100).toFixed(2)}%`}
                   description="Percentual de ganho total"
                   icon={<TrendingUp className="h-4 w-4" />}
                   trend="up"
