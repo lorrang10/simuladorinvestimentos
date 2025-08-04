@@ -244,8 +244,21 @@ export default function SimularInvestimento() {
   const annualReturn = form.useManualRate 
     ? calculateManualRate(form.manualPercentage, form.indexerType)
     : (form.type ? getCurrentRate(form.type) : 0.12)
-  const totalInvested = initialValueNum + (monthlyContributionNum * 12 * years)
-  const finalValue = totalInvested * Math.pow(1 + annualReturn, years)
+  
+  // Cálculo correto de juros compostos com aportes mensais
+  const monthlyRate = annualReturn / 12
+  const totalMonths = years * 12
+  const totalInvested = initialValueNum + (monthlyContributionNum * totalMonths)
+  
+  // Calcular valor final com juros compostos mês a mês
+  let finalValue = initialValueNum
+  for (let month = 1; month <= totalMonths; month++) {
+    // Aplica rendimento no saldo atual
+    finalValue = finalValue * (1 + monthlyRate)
+    // Adiciona aporte mensal
+    finalValue += monthlyContributionNum
+  }
+  
   const profit = finalValue - totalInvested
 
   return (
