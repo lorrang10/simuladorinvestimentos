@@ -517,12 +517,19 @@ export default function SimularInvestimento() {
           ) : (
             <>
               {/* Métricas dos Resultados */}
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <MetricCard
                   title="Retorno Total Estimado"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalValue)}
                   description={`Investimento de ${years.toFixed(2).replace('.', ',')} ${years === 1 ? 'ano' : 'anos'}`}
                   icon={<DollarSign className="h-4 w-4" />}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Rendimento Total"
+                  value={`${(((finalValue - totalInvested) / totalInvested) * 100).toFixed(2)}%`}
+                  description="Percentual de ganho total"
+                  icon={<TrendingUp className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
