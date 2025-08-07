@@ -313,6 +313,13 @@ export default function SimularInvestimento() {
                 Fonte: {ratesSource} | Atualizado: {new Date(ratesLastUpdated).toLocaleString('pt-BR')}
               </div>
             </div>
+            <div className="mt-3 pt-3 border-t border-success/20">
+              <p className="text-sm text-muted-foreground">
+                <strong>Importante:</strong> As taxas de Renda Fixa são atualizadas com dados do Banco Central (Selic/CDI). 
+                As taxas de Renda Variável são estimativas baseadas em médias históricas e podem variar significativamente. 
+                Todas as projeções são para fins educacionais e não constituem recomendação de investimento.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
