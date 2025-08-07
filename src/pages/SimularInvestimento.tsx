@@ -78,6 +78,27 @@ const investmentCategories: InvestmentCategory[] = [
         description: 'Títulos de financeiras e sociedades de crédito'
       }
     ]
+  },
+  {
+    id: 'renda-variavel',
+    name: 'Renda Variável',
+    types: [
+      {
+        id: 'acoes',
+        name: 'Ações',
+        description: 'Investimento em ações da bolsa de valores (baseado no Ibovespa)'
+      },
+      {
+        id: 'etfs',
+        name: 'ETFs',
+        description: 'Fundos de índice que replicam carteiras diversificadas'
+      },
+      {
+        id: 'fiis',
+        name: 'FIIs (Fundos Imobiliários)',
+        description: 'Investimento em fundos do setor imobiliário'
+      }
+    ]
   }
 ]
 

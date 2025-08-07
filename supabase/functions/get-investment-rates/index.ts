@@ -55,6 +55,22 @@ const fallbackRates: Record<string, InvestmentRate> = {
     type: 'Letras de Câmbio',
     rate: 0.1200,
     lastUpdated: new Date().toISOString()
+  },
+  // Renda Variável - retornos históricos médios anualizados
+  'acoes': {
+    type: 'Ações',
+    rate: 0.12,
+    lastUpdated: new Date().toISOString()
+  },
+  'etfs': {
+    type: 'ETFs',
+    rate: 0.10,
+    lastUpdated: new Date().toISOString()
+  },
+  'fiis': {
+    type: 'FIIs',
+    rate: 0.08,
+    lastUpdated: new Date().toISOString()
   }
 }
 
@@ -178,6 +194,22 @@ async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
       'letras-cambio': {
         type: 'Letras de Câmbio',
         rate: validCdiRate * 1.00, // 100% do CDI
+        lastUpdated: new Date().toISOString()
+      },
+      // Renda Variável - baseada em histórico e CDI + risco
+      'acoes': {
+        type: 'Ações',
+        rate: validCdiRate + 0.05, // CDI + 5% (retorno histórico Ibovespa)
+        lastUpdated: new Date().toISOString()
+      },
+      'etfs': {
+        type: 'ETFs',
+        rate: validCdiRate + 0.03, // CDI + 3% (mais conservador que ações)
+        lastUpdated: new Date().toISOString()
+      },
+      'fiis': {
+        type: 'FIIs',
+        rate: validCdiRate + 0.02, // CDI + 2% (distribuição de dividendos)
         lastUpdated: new Date().toISOString()
       }
     }
