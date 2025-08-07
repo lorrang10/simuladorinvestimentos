@@ -27,6 +27,7 @@ const navigationItems = [
 
 const bottomItems = [
   { title: "Configurações", url: "/configuracoes", icon: Settings },
+  { title: "Assinaturas", url: "/assinaturas", icon: Crown },
   { title: "Ajuda", url: "/ajuda", icon: HelpCircle },
 ]
 

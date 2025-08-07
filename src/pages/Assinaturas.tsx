@@ -1,0 +1,144 @@
+import { useState } from "react"
+import { Crown, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans"
+import { SubscriptionStatus } from "@/components/subscription/SubscriptionStatus"
+import { PremiumBanner } from "@/components/premium/PremiumBanner"
+import { useSubscription } from "@/hooks/useSubscription"
+import { useNavigate } from "react-router-dom"
+
+export default function Assinaturas() {
+  const [showPlans, setShowPlans] = useState(false)
+  const { isPremium } = useSubscription()
+  const navigate = useNavigate()
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex items-center gap-4 mb-8">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <Crown className="h-8 w-8 text-primary" />
+              Assinaturas
+            </h1>
+            <p className="text-muted-foreground">
+              Gerencie sua assinatura e acesse recursos premium
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-8">
+          {/* Status da Assinatura */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <SubscriptionStatus />
+            </div>
+            <div>
+              {!isPremium && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Upgrade Premium</CardTitle>
+                    <CardDescription>
+                      Desbloqueie recursos exclusivos
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={() => setShowPlans(true)}
+                      className="w-full"
+                    >
+                      <Crown className="h-4 w-4 mr-2" />
+                      Ver Planos
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+
+          {/* Recursos Premium */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recursos Premium</CardTitle>
+              <CardDescription>
+                Veja todos os benefícios inclusos na assinatura Premium
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[
+                  {
+                    title: "Simulações Ilimitadas",
+                    description: "Crie quantas simulações quiser sem limitações"
+                  },
+                  {
+                    title: "Salvar Simulações",
+                    description: "Salve e organize suas simulações favoritas"
+                  },
+                  {
+                    title: "Dashboard Completo",
+                    description: "Acesse métricas avançadas e insights detalhados"
+                  },
+                  {
+                    title: "Histórico Detalhado",
+                    description: "Visualize todo seu histórico de investimentos"
+                  },
+                  {
+                    title: "Análises Avançadas",
+                    description: "Relatórios personalizados e comparações"
+                  },
+                  {
+                    title: "Suporte Prioritário",
+                    description: "Atendimento especializado quando precisar"
+                  }
+                ].map((feature, index) => (
+                  <div 
+                    key={index} 
+                    className="p-4 rounded-lg border bg-card"
+                  >
+                    <h3 className="font-medium mb-2">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Planos de Assinatura */}
+          {(showPlans || !isPremium) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Planos de Assinatura</CardTitle>
+                <CardDescription>
+                  Escolha o plano que melhor se adapta às suas necessidades
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SubscriptionPlans />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Banner para usuários free */}
+          {!isPremium && !showPlans && (
+            <PremiumBanner 
+              variant="detailed"
+              onUpgrade={() => setShowPlans(true)}
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

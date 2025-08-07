@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import SimularInvestimento from "./pages/SimularInvestimento";
 import MeusInvestimentos from "./pages/MeusInvestimentos";
 import Configuracoes from "./pages/Configuracoes";
+import Assinaturas from "./pages/Assinaturas";
 import Ajuda from "./pages/Ajuda";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/configuracoes" element={<Configuracoes />} />
+                    <Route path="/assinaturas" element={<Assinaturas />} />
                     <Route path="/ajuda" element={<Ajuda />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>

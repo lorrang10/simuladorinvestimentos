@@ -39,10 +39,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Escutar mudanças de autenticação
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+
+      // Check subscription status when user signs in
+      if (event === 'SIGNED_IN' && session?.user) {
+        setTimeout(() => {
+          supabase.functions.invoke('check-subscription', {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }).catch(console.error)
+        }, 1000)
+      }
     })
 
     return () => subscription.unsubscribe()
