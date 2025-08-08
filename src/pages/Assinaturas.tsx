@@ -1,10 +1,9 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Crown, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans"
 import { SubscriptionStatus } from "@/components/subscription/SubscriptionStatus"
-import { PremiumBanner } from "@/components/premium/PremiumBanner"
 import { useSubscription } from "@/hooks/useSubscription"
 import { useNavigate } from "react-router-dom"
 
@@ -12,6 +11,14 @@ export default function Assinaturas() {
   const [showPlans, setShowPlans] = useState(false)
   const { isPremium } = useSubscription()
   const navigate = useNavigate()
+  const plansRef = useRef<HTMLDivElement>(null)
+
+  const handleShowPlans = () => {
+    setShowPlans(true)
+    setTimeout(() => {
+      plansRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,32 +45,7 @@ export default function Assinaturas() {
 
         <div className="space-y-8">
           {/* Status da Assinatura */}
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <SubscriptionStatus />
-            </div>
-            <div>
-              {!isPremium && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Upgrade Premium</CardTitle>
-                    <CardDescription>
-                      Desbloqueie recursos exclusivos
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      onClick={() => setShowPlans(true)}
-                      className="w-full"
-                    >
-                      <Crown className="h-4 w-4 mr-2" />
-                      Ver Planos
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </div>
+          <SubscriptionStatus />
 
           {/* Recursos Premium */}
           <Card>
@@ -112,30 +94,37 @@ export default function Assinaturas() {
                   </div>
                 ))}
               </div>
+              
+              {!isPremium && (
+                <div className="mt-6 text-center">
+                  <Button 
+                    onClick={handleShowPlans}
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Ver Planos
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Planos de Assinatura */}
-          {(showPlans || !isPremium) && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Planos de Assinatura</CardTitle>
-                <CardDescription>
-                  Escolha o plano que melhor se adapta às suas necessidades
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SubscriptionPlans />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Banner para usuários free */}
-          {!isPremium && !showPlans && (
-            <PremiumBanner 
-              variant="detailed"
-              onUpgrade={() => setShowPlans(true)}
-            />
+          {showPlans && (
+            <div ref={plansRef}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Planos de Assinatura</CardTitle>
+                  <CardDescription>
+                    Escolha o plano que melhor se adapta às suas necessidades
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SubscriptionPlans />
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>
