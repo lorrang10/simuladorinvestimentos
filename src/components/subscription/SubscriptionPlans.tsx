@@ -1,3 +1,4 @@
+
 import { Crown, Check, Zap, Calendar } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,9 +28,9 @@ export function SubscriptionPlans({ onPlanSelect }: SubscriptionPlansProps) {
       name: 'Premium Semestral',
       price: 'R$ 79,70',
       billing: '/semestre',
-      description: 'Melhor custo-benefício',
+      description: 'Escolha o plano semestral',
       icon: <Zap className="h-6 w-6" />,
-      popular: true,
+      popular: false,
       discount: '17% OFF',
       originalPrice: 'R$ 58,20',
     },
@@ -40,7 +41,7 @@ export function SubscriptionPlans({ onPlanSelect }: SubscriptionPlansProps) {
       billing: '/ano',
       description: 'Máximo desconto',
       icon: <Crown className="h-6 w-6" />,
-      popular: false,
+      popular: true,
       discount: '23% OFF',
       originalPrice: 'R$ 116,40',
     },
@@ -113,9 +114,9 @@ export function SubscriptionPlans({ onPlanSelect }: SubscriptionPlansProps) {
                     {plan.originalPrice}
                   </p>
                 )}
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.billing}</span>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-1">
+                  <span className="text-3xl sm:text-4xl font-bold text-primary whitespace-nowrap">{plan.price}</span>
+                  <span className="text-muted-foreground text-sm sm:text-base">{plan.billing}</span>
                 </div>
               </div>
             </CardHeader>
