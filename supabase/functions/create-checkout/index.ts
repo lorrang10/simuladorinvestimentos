@@ -54,18 +54,18 @@ serve(async (req) => {
     // Define subscription plans
     const plans = {
       monthly: {
-        amount: 2990, // R$ 29,90
+        amount: 970, // R$ 9,70
         interval: "month" as const,
         name: "Premium Mensal"
       },
       semiannual: {
-        amount: 14990, // R$ 149,90 (desconto de 17%)
+        amount: 7970, // R$ 79,70
         interval: "month" as const,
         interval_count: 6,
         name: "Premium Semestral"
       },
       annual: {
-        amount: 29900, // R$ 299,00 (desconto de 17%)
+        amount: 8970, // R$ 89,70
         interval: "year" as const,
         name: "Premium Anual"
       }
@@ -79,6 +79,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
+      payment_method_types: ["card", "boleto"],
       line_items: [
         {
           price_data: {

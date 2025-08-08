@@ -87,11 +87,11 @@ serve(async (req) => {
       const price = await stripe.prices.retrieve(priceId);
       const amount = price.unit_amount || 0;
       
-      if (amount >= 29900 && amount < 50000) { // R$ 299,00 semestral
-        subscriptionTier = "Premium Semestral";
-      } else if (amount >= 50000) { // R$ 500,00 anual
+      if (amount >= 8970) { // R$ 89,70 anual
         subscriptionTier = "Premium Anual";
-      } else { // R$ 29,90 mensal
+      } else if (amount >= 7970) { // R$ 79,70 semestral
+        subscriptionTier = "Premium Semestral";
+      } else { // R$ 9,70 mensal
         subscriptionTier = "Premium Mensal";
       }
       logStep("Determined subscription tier", { priceId, amount, subscriptionTier });

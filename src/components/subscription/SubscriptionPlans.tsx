@@ -15,7 +15,7 @@ export function SubscriptionPlans({ onPlanSelect }: SubscriptionPlansProps) {
     {
       type: 'monthly' as const,
       name: 'Premium Mensal',
-      price: 'R$ 29,90',
+      price: 'R$ 9,70',
       billing: '/mês',
       description: 'Perfeito para começar',
       icon: <Calendar className="h-6 w-6" />,
@@ -25,24 +25,24 @@ export function SubscriptionPlans({ onPlanSelect }: SubscriptionPlansProps) {
     {
       type: 'semiannual' as const,
       name: 'Premium Semestral',
-      price: 'R$ 149,90',
+      price: 'R$ 79,70',
       billing: '/semestre',
       description: 'Melhor custo-benefício',
       icon: <Zap className="h-6 w-6" />,
       popular: true,
       discount: '17% OFF',
-      originalPrice: 'R$ 179,40',
+      originalPrice: 'R$ 58,20',
     },
     {
       type: 'annual' as const,
       name: 'Premium Anual',
-      price: 'R$ 299,00',
+      price: 'R$ 89,70',
       billing: '/ano',
       description: 'Máximo desconto',
       icon: <Crown className="h-6 w-6" />,
       popular: false,
-      discount: '17% OFF',
-      originalPrice: 'R$ 358,80',
+      discount: '23% OFF',
+      originalPrice: 'R$ 116,40',
     },
   ]
 
