@@ -83,20 +83,9 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
-                      to={item.premium && !isPremium ? "#" : item.url} 
+                      to={item.url} 
                       end 
-                      className={({ isActive }) => {
-                        const baseClasses = getNavCls({ isActive });
-                        if (item.premium && !isPremium) {
-                          return `${baseClasses} opacity-50 cursor-not-allowed`;
-                        }
-                        return baseClasses;
-                      }}
-                      onClick={(e) => {
-                        if (item.premium && !isPremium) {
-                          e.preventDefault();
-                        }
-                      }}
+                      className={getNavCls}
                     >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && (
