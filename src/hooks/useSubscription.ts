@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { useUserProfile } from '@/hooks/useUserProfile'
 
 interface SubscriptionData {
   subscribed: boolean
@@ -13,6 +14,7 @@ export function useSubscription() {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null)
   const [loading, setLoading] = useState(false)
   const { user, session } = useAuth()
+  const { profile } = useUserProfile()
   const { toast } = useToast()
 
   const checkSubscription = async () => {
@@ -114,10 +116,15 @@ export function useSubscription() {
     }
   }, [user])
 
+  // Check both Stripe subscription and user profile for premium status
+  const isPremiumFromStripe = subscription?.subscribed || false
+  const isPremiumFromProfile = profile?.plano_assinatura === 'premium'
+  const isPremium = isPremiumFromStripe || isPremiumFromProfile
+
   return {
     subscription,
     loading,
-    isPremium: subscription?.subscribed || false,
+    isPremium,
     checkSubscription,
     createCheckout,
     openCustomerPortal,
