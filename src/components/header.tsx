@@ -1,4 +1,4 @@
-import { Menu, Bell } from "lucide-react"
+import { Bell } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,37 +12,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
-import { useIsMobile } from "@/hooks/use-mobile"
 
 interface HeaderProps {
-  title?: string
+  title: string
 }
 
 export function Header({ title }: HeaderProps) {
   const { signOut } = useAuth()
   const { profile, isPremium } = useUserProfile()
-  const isMobile = useIsMobile()
-
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background px-4 sticky top-0 z-40">
+    <header className="flex h-16 items-center justify-between border-b bg-card px-6">
       <div className="flex items-center gap-4">
-        <SidebarTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <Menu className="h-4 w-4" />
-            <span className="sr-only">Abrir menu</span>
-          </Button>
-        </SidebarTrigger>
-        
-        {isMobile ? (
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary">
-              <div className="h-3 w-3 rounded-sm bg-primary-foreground" />
-            </div>
-            <h1 className="text-sm font-semibold">InvestSmart</h1>
-          </div>
-        ) : (
-          title && <h1 className="text-xl font-semibold text-foreground">{title}</h1>
-        )}
+        <SidebarTrigger className="h-8 w-8" />
+        <h1 className="text-xl font-semibold text-foreground">{title}</h1>
       </div>
 
       <div className="flex items-center gap-4">

@@ -52,5 +52,5 @@ export function ProtectedRoute({ children, requiresPremium = false }: ProtectedR
     )
   }
 
-  return children as React.ReactElement
+  return <>{children}</>
 }
