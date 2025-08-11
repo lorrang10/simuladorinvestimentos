@@ -305,7 +305,7 @@ export default function SimularInvestimento() {
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                <span className="text-success-foreground font-medium">
+                <span className="text-black font-medium">
                   Taxas em tempo real ativas
                 </span>
               </div>

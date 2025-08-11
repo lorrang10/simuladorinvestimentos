@@ -58,14 +58,6 @@ export function SubscriptionStatus() {
               Ativo
             </Badge>
           </div>
-          <Button 
-            onClick={openCustomerPortal}
-            variant="outline" 
-            size="sm"
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Gerenciar
-          </Button>
         </div>
         
         {subscription?.subscription_tier && (
