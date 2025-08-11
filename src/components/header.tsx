@@ -1,7 +1,5 @@
-import { Bell } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,14 +26,6 @@ export function Header({ title }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Notificações */}
-        <Button variant="ghost" size="sm" className="relative">
-          <Bell className="h-5 w-5" />
-          <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-danger p-0 text-xs">
-            3
-          </Badge>
-        </Button>
-
         {/* Perfil do Usuário */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
