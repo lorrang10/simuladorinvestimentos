@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useNavigate } from "react-router-dom"
 
 interface HeaderProps {
   title: string
@@ -18,6 +19,15 @@ interface HeaderProps {
 export function Header({ title }: HeaderProps) {
   const { signOut } = useAuth()
   const { profile, isPremium } = useUserProfile()
+  const navigate = useNavigate()
+
+  const handleNavigateToSettings = () => {
+    navigate('/configuracoes')
+  }
+
+  const handleNavigateToSubscriptions = () => {
+    navigate('/assinaturas')
+  }
   return (
     <header className="flex h-16 items-center justify-between border-b bg-card px-6">
       <div className="flex items-center gap-4">
@@ -51,8 +61,13 @@ export function Header({ title }: HeaderProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem>Minha Conta</DropdownMenuItem>
-            <DropdownMenuItem>Configurações</DropdownMenuItem>
-            <DropdownMenuItem>Planos & Assinatura</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNavigateToSettings}>Configurações</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNavigateToSubscriptions}>
+              Planos & Assinatura
+              <span className="ml-auto text-xs text-muted-foreground">
+                {isPremium ? 'Premium' : 'Free'}
+              </span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-danger" onClick={signOut}>Sair</DropdownMenuItem>
           </DropdownMenuContent>
