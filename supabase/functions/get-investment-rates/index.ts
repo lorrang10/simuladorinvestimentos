@@ -196,20 +196,20 @@ async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
         rate: validCdiRate * 1.00, // 100% do CDI
         lastUpdated: new Date().toISOString()
       },
-      // Renda Variável - baseada em histórico e CDI + risco
+      // Renda Variável - baseada em histórico e CDI + risco (ajustado para perfil conservador)
       'acoes': {
         type: 'Ações',
-        rate: validCdiRate + 0.05, // CDI + 5% (retorno histórico Ibovespa)
+        rate: validCdiRate + 0.03, // CDI + 3% (mais conservador para ações)
         lastUpdated: new Date().toISOString()
       },
       'etfs': {
         type: 'ETFs',
-        rate: validCdiRate + 0.03, // CDI + 3% (mais conservador que ações)
+        rate: validCdiRate + 0.015, // CDI + 1.5% (mais conservador para ETFs)
         lastUpdated: new Date().toISOString()
       },
       'fiis': {
         type: 'FIIs',
-        rate: validCdiRate + 0.02, // CDI + 2% (distribuição de dividendos)
+        rate: validCdiRate + 0.01, // CDI + 1% (mais conservador para FIIs)
         lastUpdated: new Date().toISOString()
       }
     }
