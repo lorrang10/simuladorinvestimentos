@@ -28,48 +28,48 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 horas em millisegundos
 const fallbackRates: Record<string, InvestmentRate> = {
   'tesouro-direto': {
     type: 'Tesouro Direto',
-    rate: 0.1175,
+    rate: 0.1550, // Atualizado para 15.50% (Selic + 0.5% spread)
     lastUpdated: new Date().toISOString()
   },
   'cdb': {
     type: 'CDB',
-    rate: 0.1250,
+    rate: 0.1550, // Atualizado para 15.50% (105% do CDI)
     lastUpdated: new Date().toISOString()
   },
   'lci': {
     type: 'LCI',
-    rate: 0.1050,
+    rate: 0.1300, // Atualizado para 13.00% (88% do CDI)
     lastUpdated: new Date().toISOString()
   },
   'lca': {
     type: 'LCA',
-    rate: 0.1075,
+    rate: 0.1330, // Atualizado para 13.30% (90% do CDI)
     lastUpdated: new Date().toISOString()
   },
   'debentures': {
     type: 'Debêntures',
-    rate: 0.1350,
+    rate: 0.1700, // Atualizado para 17.00% (Selic + 2% spread)
     lastUpdated: new Date().toISOString()
   },
   'letras-cambio': {
     type: 'Letras de Câmbio',
-    rate: 0.1200,
+    rate: 0.1480, // Atualizado para 14.80% (100% do CDI)
     lastUpdated: new Date().toISOString()
   },
   // Renda Variável - retornos históricos médios anualizados
   'acoes': {
     type: 'Ações',
-    rate: 0.12,
+    rate: 0.1980, // Atualizado para 19.80% (CDI + 5%)
     lastUpdated: new Date().toISOString()
   },
   'etfs': {
     type: 'ETFs',
-    rate: 0.10,
+    rate: 0.1780, // Atualizado para 17.80% (CDI + 3%)
     lastUpdated: new Date().toISOString()
   },
   'fiis': {
     type: 'FIIs',
-    rate: 0.08,
+    rate: 0.1680, // Atualizado para 16.80% (CDI + 2%)
     lastUpdated: new Date().toISOString()
   }
 }
@@ -118,8 +118,8 @@ async function fetchCDIRate(): Promise<number> {
     if (data && Array.isArray(data) && data.length > 0) {
       // Pega a taxa mais recente e converte corretamente
       const latestRate = data[0]
-      const rateValue = parseFloat(latestRate.valor) / 100 // API retorna em %
-      console.log(`CDI rate from API: ${latestRate.valor}% -> ${rateValue}`)
+      const rateValue = Math.pow(1 + (parseFloat(latestRate.valor) / 100), 252) - 1 // Anualiza a taxa diária (considerando 252 dias úteis)
+      console.log(`CDI rate from API: ${latestRate.valor}% (diário) -> ${(rateValue * 100).toFixed(2)}% (anual)`)
       return rateValue
     }
     
