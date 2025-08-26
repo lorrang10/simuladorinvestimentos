@@ -18,6 +18,16 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
+// Map Stripe Price IDs to subscription tiers
+const getPlanTypeFromPriceId = (priceId: string): string => {
+  const priceMapping = {
+    "price_1RgtU0Gbdk9VaHsmmqCj5q1h": "Premium Mensal",
+    "price_1S0M4JGbdk9VaHsmeMhGVObO": "Premium Semestral", 
+    "price_1S0M4tGbdk9VaHsmfrsyX0er": "Premium Anual"
+  };
+  return priceMapping[priceId] || "Premium";
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -87,19 +97,10 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       
-      // Determine subscription tier from price
+      // Determine subscription tier from Price ID
       const priceId = subscription.items.data[0].price.id;
-      const price = await stripe.prices.retrieve(priceId);
-      const amount = price.unit_amount || 0;
-      
-      if (amount >= 8970) { // R$ 89,70 anual
-        subscriptionTier = "Premium Anual";
-      } else if (amount >= 7970) { // R$ 79,70 semestral
-        subscriptionTier = "Premium Semestral";
-      } else { // R$ 9,70 mensal
-        subscriptionTier = "Premium Mensal";
-      }
-      logStep("Determined subscription tier", { priceId, amount, subscriptionTier });
+      subscriptionTier = getPlanTypeFromPriceId(priceId);
+      logStep("Determined subscription tier", { priceId, subscriptionTier });
     } else {
       logStep("No active subscription found");
     }

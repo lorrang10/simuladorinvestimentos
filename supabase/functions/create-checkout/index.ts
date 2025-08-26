@@ -56,22 +56,18 @@ serve(async (req) => {
       logStep("Creating new customer");
     }
 
-    // Define subscription plans
+    // Define subscription plans with Stripe Price IDs
     const plans = {
       monthly: {
-        amount: 970, // R$ 9,70
-        interval: "month" as const,
+        priceId: "price_1RgtU0Gbdk9VaHsmmqCj5q1h",
         name: "Premium Mensal"
       },
       semiannual: {
-        amount: 7970, // R$ 79,70
-        interval: "month" as const,
-        interval_count: 6,
+        priceId: "price_1S0M4JGbdk9VaHsmeMhGVObO",
         name: "Premium Semestral"
       },
       annual: {
-        amount: 8970, // R$ 89,70
-        interval: "year" as const,
+        priceId: "price_1S0M4tGbdk9VaHsmfrsyX0er",
         name: "Premium Anual"
       }
     };
@@ -79,7 +75,7 @@ serve(async (req) => {
     const selectedPlan = plans[planType as keyof typeof plans];
     if (!selectedPlan) throw new Error("Invalid plan type");
 
-    logStep("Creating checkout session", { plan: selectedPlan });
+    logStep("Creating checkout session", { planType, priceId: selectedPlan.priceId });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -87,18 +83,7 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: [
         {
-          price_data: {
-            currency: "brl",
-            product_data: { 
-              name: selectedPlan.name,
-              description: `Acesso premium ao InvestSmart - ${selectedPlan.name}`
-            },
-            unit_amount: selectedPlan.amount,
-            recurring: {
-              interval: selectedPlan.interval,
-              interval_count: selectedPlan.interval_count || 1,
-            },
-          },
+          price: selectedPlan.priceId,
           quantity: 1,
         },
       ],
