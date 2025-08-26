@@ -88,8 +88,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/dashboard?checkout=success`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?checkout=cancel`,
+      success_url: `${req.headers.get("origin")}/simular?checkout=success`,
+      cancel_url: `${req.headers.get("origin")}/simular?checkout=cancel`,
       locale: "pt-BR",
       billing_address_collection: "required",
       automatic_tax: {
