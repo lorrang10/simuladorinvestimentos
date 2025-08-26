@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { TrendingUp, Loader2 } from "lucide-react"
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useFirstTimeUser } from "@/hooks/useFirstTimeUser"
+import { useNavigate } from "react-router-dom"
 
 const personalDataSchema = z.object({
   nome_completo: z.string().min(1, "Nome completo é obrigatório"),
@@ -31,6 +33,8 @@ interface PersonalDataFormProps {
 export function PersonalDataForm({ onComplete }: PersonalDataFormProps) {
   const [loading, setLoading] = useState(false)
   const { updateProfile } = useUserProfile()
+  const { isFirstTimeUser } = useFirstTimeUser()
+  const navigate = useNavigate()
 
   const form = useForm<PersonalDataForm>({
     resolver: zodResolver(personalDataSchema),
@@ -48,6 +52,14 @@ export function PersonalDataForm({ onComplete }: PersonalDataFormProps) {
     try {
       await updateProfile(data)
       onComplete()
+      
+      // Redirecionar para simulação apenas se for usuário de primeira vez
+      // Usar timeout para garantir que o perfil foi atualizado
+      setTimeout(() => {
+        if (isFirstTimeUser) {
+          navigate('/simular')
+        }
+      }, 100)
     } catch (error) {
       console.error('Erro ao salvar dados pessoais:', error)
     } finally {

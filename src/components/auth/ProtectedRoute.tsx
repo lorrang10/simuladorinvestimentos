@@ -1,12 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
-import { useFirstTimeUser } from "@/hooks/useFirstTimeUser"
 import { AuthForm } from "./AuthForm"
 import { PersonalDataForm } from "./PersonalDataForm"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans"
-import { useNavigate } from "react-router-dom"
-import { useEffect } from "react"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -16,18 +13,9 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requiresPremium = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
   const { isPremium, isProfileComplete, loading: profileLoading, fetchProfile } = useUserProfile()
-  const { isFirstTimeUser, loading: firstTimeLoading } = useFirstTimeUser()
-  const navigate = useNavigate()
 
-  // Redirecionar usuários novos para simulação apenas na primeira vez (quando estão no dashboard)
-  useEffect(() => {
-    if (user && isProfileComplete && !firstTimeLoading && isFirstTimeUser && 
-        (window.location.pathname === '/' || window.location.pathname === '/dashboard')) {
-      navigate('/simular')
-    }
-  }, [user, isProfileComplete, isFirstTimeUser, firstTimeLoading, navigate])
 
-  if (loading || profileLoading || firstTimeLoading) {
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="space-y-4 w-full max-w-md">
