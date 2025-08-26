@@ -1,15 +1,29 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/contexts/AuthContext"
-import { Loader2, TrendingUp } from "lucide-react"
+import { Loader2, TrendingUp, CheckCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export function AuthForm() {
   const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState("signin")
+  const [emailConfirmed, setEmailConfirmed] = useState(false)
   const { signIn, signUp } = useAuth()
+
+  useEffect(() => {
+    // Verificar se o usuário veio de uma confirmação de email
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('confirmed') === 'true') {
+      setEmailConfirmed(true)
+      setActiveTab("signin")
+      // Limpar a URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -37,7 +51,11 @@ export function AuthForm() {
       return
     }
 
-    await signUp(email, password)
+    const { error } = await signUp(email, password)
+    if (!error) {
+      // Redirecionar para a aba de login após cadastro bem-sucedido
+      setActiveTab("signin")
+    }
     setLoading(false)
   }
 
@@ -57,7 +75,15 @@ export function AuthForm() {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          {emailConfirmed && (
+            <Alert className="mb-4 border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                Email confirmado com sucesso! Agora você pode fazer login.
+              </AlertDescription>
+            </Alert>
+          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Cadastrar</TabsTrigger>
