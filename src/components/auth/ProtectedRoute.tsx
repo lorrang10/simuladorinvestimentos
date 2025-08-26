@@ -19,9 +19,10 @@ export function ProtectedRoute({ children, requiresPremium = false }: ProtectedR
   const { isFirstTimeUser, loading: firstTimeLoading } = useFirstTimeUser()
   const navigate = useNavigate()
 
-  // Redirecionar usuários novos para simulação após completar perfil
+  // Redirecionar usuários novos para simulação apenas na primeira vez (quando estão no dashboard)
   useEffect(() => {
-    if (user && isProfileComplete && !firstTimeLoading && isFirstTimeUser && window.location.pathname !== '/simular') {
+    if (user && isProfileComplete && !firstTimeLoading && isFirstTimeUser && 
+        (window.location.pathname === '/' || window.location.pathname === '/dashboard')) {
       navigate('/simular')
     }
   }, [user, isProfileComplete, isFirstTimeUser, firstTimeLoading, navigate])
