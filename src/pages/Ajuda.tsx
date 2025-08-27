@@ -1,9 +1,6 @@
 import { Header } from "@/components/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {
   Accordion,
@@ -11,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { useToast } from "@/hooks/use-toast"
 
 const faqItems = [
   {
@@ -75,15 +71,6 @@ const tutorialSteps = [
 ]
 
 export default function Ajuda() {
-  const { toast } = useToast()
-
-  const handleSubmitContact = (e: React.FormEvent) => {
-    e.preventDefault()
-    toast({
-      title: "Mensagem enviada!",
-      description: "Nossa equipe entrará em contato em até 24 horas",
-    })
-  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -169,38 +156,8 @@ export default function Ajuda() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Contato */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Entre em Contato</CardTitle>
-            <CardDescription>
-              Não encontrou o que procurava? Envie sua dúvida
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmitContact} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="subject">Assunto</Label>
-                <Input id="subject" placeholder="Como podemos ajudar?" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="message">Mensagem</Label>
-                <Textarea 
-                  id="message" 
-                  placeholder="Descreva sua dúvida ou problema..."
-                  rows={4}
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Enviar Mensagem
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Status do Sistema */}
-        <Card>
+      {/* Status do Sistema */}
+      <Card>
           <CardHeader>
             <CardTitle>Status do Sistema</CardTitle>
             <CardDescription>
@@ -226,12 +183,6 @@ export default function Ajuda() {
                 ✓ Operacional
               </Badge>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Notificações</span>
-              <Badge className="bg-warning text-warning-foreground">
-                ⚠ Manutenção
-              </Badge>
-            </div>
             
             <div className="pt-4 border-t">
               <div className="text-sm">
@@ -241,48 +192,6 @@ export default function Ajuda() {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Recursos Educacionais */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recursos Educacionais</CardTitle>
-          <CardDescription>
-            Aprenda mais sobre investimentos e educação financeira
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">📚 Guia do Iniciante</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Conceitos básicos sobre investimentos e como começar
-              </p>
-              <Button variant="outline" size="sm">
-                Ler Guia
-              </Button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">💡 Estratégias Avançadas</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Técnicas para otimizar seus investimentos
-              </p>
-              <Button variant="outline" size="sm">
-                Explorar
-              </Button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">📊 Análise de Mercado</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Relatórios e insights do mercado financeiro
-              </p>
-              <Button variant="outline" size="sm">
-                Ver Análises
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
