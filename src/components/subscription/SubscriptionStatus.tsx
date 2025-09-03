@@ -8,6 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function SubscriptionStatus() {
   const { subscription, loading, isPremium, checkSubscription } = useSubscription()
 
+  console.log('SubscriptionStatus - subscription:', subscription)
+  console.log('SubscriptionStatus - isPremium:', isPremium)
+
   if (loading) {
     return (
       <Card>
@@ -25,6 +28,8 @@ export function SubscriptionStatus() {
   const subscriptionEndDate = subscription?.subscription_end 
     ? new Date(subscription.subscription_end).toLocaleDateString('pt-BR')
     : null
+
+  console.log('SubscriptionStatus - subscriptionEndDate:', subscriptionEndDate)
 
   if (!isPremium) {
     return (

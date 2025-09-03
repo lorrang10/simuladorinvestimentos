@@ -33,6 +33,7 @@ export function useSubscription() {
 
       if (error) throw error
 
+      console.log('Subscription data received:', data)
       setSubscription(data)
     } catch (error) {
       console.error('Erro ao verificar assinatura:', error)
