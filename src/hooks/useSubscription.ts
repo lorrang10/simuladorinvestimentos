@@ -8,6 +8,7 @@ interface SubscriptionData {
   subscribed: boolean
   subscription_tier?: string
   subscription_end?: string
+  cancel_at_period_end?: boolean
 }
 
 export function useSubscription() {
@@ -80,6 +81,80 @@ export function useSubscription() {
     }
   }
 
+  const cancelSubscription = async () => {
+    if (!user || !session) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para gerenciar a assinatura",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: data.message || "Assinatura cancelada com sucesso",
+      })
+      
+      await checkSubscription()
+      return true
+    } catch (error) {
+      console.error('Erro ao cancelar assinatura:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível cancelar a assinatura",
+        variant: "destructive",
+      })
+      return false
+    }
+  }
+
+  const reactivateSubscription = async () => {
+    if (!user || !session) {
+      toast({
+        title: "Erro",
+        description: "Você precisa estar logado para reativar a assinatura",
+        variant: "destructive",
+      })
+      return false
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('reactivate-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (error) throw error
+
+      toast({
+        title: "Sucesso",
+        description: data.message || "Renovação automática reativada com sucesso",
+      })
+      
+      await checkSubscription()
+      return true
+    } catch (error) {
+      console.error('Erro ao reativar assinatura:', error)
+      toast({
+        title: "Erro",
+        description: "Não foi possível reativar a renovação automática",
+        variant: "destructive",
+      })
+      return false
+    }
+  }
+
   const openCustomerPortal = async () => {
     if (!user || !session) {
       toast({
@@ -128,6 +203,8 @@ export function useSubscription() {
     isPremium,
     checkSubscription,
     createCheckout,
+    cancelSubscription,
+    reactivateSubscription,
     openCustomerPortal,
   }
 }
