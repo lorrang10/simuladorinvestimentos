@@ -20,8 +20,8 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("Chave_Stripe");
-    if (!stripeKey) throw new Error("Chave_Stripe is not set");
+    const stripeKey = Deno.env.get("CHAVE_QA");
+    if (!stripeKey) throw new Error("CHAVE_QA is not set");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
