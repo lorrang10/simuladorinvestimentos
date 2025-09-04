@@ -25,16 +25,11 @@ export function SubscriptionStatus() {
     )
   }
 
-  // Se tem data do Stripe, usa ela. Senão, se é premium, gera uma data estimada (30 dias)
   const subscriptionEndDate = subscription?.subscription_end 
     ? new Date(subscription.subscription_end).toLocaleDateString('pt-BR')
-    : isPremium 
-      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')
-      : null
+    : null
 
   console.log('SubscriptionStatus - subscriptionEndDate:', subscriptionEndDate)
-  console.log('SubscriptionStatus - subscription_end from stripe:', subscription?.subscription_end)
-  console.log('SubscriptionStatus - isPremium from profile:', isPremium)
 
   if (!isPremium) {
     return (
