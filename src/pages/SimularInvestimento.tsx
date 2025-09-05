@@ -324,9 +324,9 @@ export default function SimularInvestimento() {
         </Card>
       )}
       
-      <div className="grid gap-6 lg:grid-cols-2 overflow-x-hidden">
+      <div className="grid gap-6 lg:grid-cols-2 w-full max-w-full">
         {/* Formulário */}
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Nova Simulação</CardTitle>
             <CardDescription>
@@ -558,7 +558,7 @@ export default function SimularInvestimento() {
           ) : (
             <>
               {/* Métricas dos Resultados */}
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full">
                 <MetricCard
                   title="Retorno Total Estimado"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalValue)}
@@ -597,27 +597,29 @@ export default function SimularInvestimento() {
               </div>
 
               {/* Gráfico */}
-              <Card>
+              <Card className="min-w-0 w-full">
                 <CardHeader>
                   <CardTitle>Evolução do Investimento</CardTitle>
                   <CardDescription>
                     Projeção do crescimento ao longo do tempo
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="p-4 sm:p-6">
-                  <SimulationChart 
-                    liveSimulation={{
-                      valorInicial: initialValueNum,
-                      valorMensal: monthlyContributionNum,
-                      taxaJuros: annualReturn,
-                      periodoAnos: years
-                    }}
-                  />
+                <CardContent className="p-2 sm:p-4 lg:p-6">
+                  <div className="w-full overflow-x-auto">
+                    <SimulationChart 
+                      liveSimulation={{
+                        valorInicial: initialValueNum,
+                        valorMensal: monthlyContributionNum,
+                        taxaJuros: annualReturn,
+                        periodoAnos: years
+                      }}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Resumo da Simulação */}
-              <Card>
+              <Card className="min-w-0 w-full">
                 <CardHeader>
                   <CardTitle>Resumo da Simulação</CardTitle>
                 </CardHeader>

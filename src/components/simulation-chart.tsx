@@ -109,8 +109,9 @@ export function SimulationChart({ className, simulations, selectedSimulationId, 
   }
 
   return (
-    <div className={`${className} w-full overflow-x-auto`}>
-      <ResponsiveContainer width="100%" height={300} minWidth={300}>
+    <div className={`w-full ${className || ''}`}>
+      <div className="w-full overflow-x-auto">
+        <ResponsiveContainer width="100%" height={300} minWidth={280}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
           <XAxis 
@@ -146,6 +147,7 @@ export function SimulationChart({ className, simulations, selectedSimulationId, 
           />
         </LineChart>
       </ResponsiveContainer>
+      </div>
     </div>
   )
 }
