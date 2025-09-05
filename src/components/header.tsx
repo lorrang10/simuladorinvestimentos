@@ -60,7 +60,6 @@ export function Header({ title }: HeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>Minha Conta</DropdownMenuItem>
             <DropdownMenuItem onClick={handleNavigateToSettings}>Configurações</DropdownMenuItem>
             <DropdownMenuItem onClick={handleNavigateToSubscriptions}>
               Planos & Assinatura
