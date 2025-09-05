@@ -1,4 +1,4 @@
-import { Crown, Calendar, RefreshCw, Settings, AlertTriangle } from "lucide-react"
+import { Crown, Calendar, RefreshCw, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,8 +14,7 @@ export function SubscriptionStatus() {
     isPremium, 
     checkSubscription, 
     cancelSubscription, 
-    reactivateSubscription, 
-    openCustomerPortal 
+    reactivateSubscription
   } = useSubscription()
   const [isToggling, setIsToggling] = useState(false)
 
@@ -101,9 +100,9 @@ export function SubscriptionStatus() {
       <CardContent className="space-y-4">
         {/* Status da renovação */}
         {isCancelPending && (
-          <div className="flex items-center gap-2 p-3 bg-warning/10 text-warning-foreground rounded-md border border-warning/20">
+          <div className="flex items-center gap-2 p-3 bg-warning/10 rounded-md border border-warning/20">
             <AlertTriangle className="h-4 w-4" />
-            <span className="text-sm">Sua assinatura será cancelada em {subscriptionEndDate}</span>
+            <span className="text-sm text-foreground">Sua assinatura será cancelada em {subscriptionEndDate}</span>
           </div>
         )}
         
@@ -142,16 +141,6 @@ export function SubscriptionStatus() {
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar Status
-          </Button>
-          
-          <Button 
-            onClick={openCustomerPortal}
-            variant="secondary" 
-            size="sm"
-            disabled={isToggling}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Gerenciar Assinatura
           </Button>
         </div>
       </CardContent>
