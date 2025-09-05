@@ -283,7 +283,7 @@ export default function SimularInvestimento() {
   const profit = finalValue - totalInvested
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6 p-4 sm:p-6 overflow-x-hidden max-w-full">
       <Header title="Simular Investimento" />
       
       {!isPremium && (
@@ -324,7 +324,7 @@ export default function SimularInvestimento() {
         </Card>
       )}
       
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 overflow-x-hidden">
         {/* Formulário */}
         <Card>
           <CardHeader>
@@ -558,7 +558,7 @@ export default function SimularInvestimento() {
           ) : (
             <>
               {/* Métricas dos Resultados */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 <MetricCard
                   title="Retorno Total Estimado"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalValue)}
@@ -604,7 +604,7 @@ export default function SimularInvestimento() {
                     Projeção do crescimento ao longo do tempo
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 sm:p-6">
                   <SimulationChart 
                     liveSimulation={{
                       valorInicial: initialValueNum,
@@ -622,7 +622,7 @@ export default function SimularInvestimento() {
                   <CardTitle>Resumo da Simulação</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Nome:</span>
                       <p className="font-medium">{form.name}</p>
@@ -642,7 +642,7 @@ export default function SimularInvestimento() {
                       <p className="font-medium">{form.duration} {form.durationType}</p>
                     </div>
                     {form.hasMonthlyContribution && (
-                      <div className="col-span-2">
+                      <div className="sm:col-span-2">
                         <span className="text-muted-foreground">Aporte Mensal:</span>
                         <p className="font-medium">{formatCurrency(form.monthlyContribution)}</p>
                       </div>

@@ -34,7 +34,7 @@ export function MetricCard({
         {icon && <div className="text-primary">{icon}</div>}
       </CardHeader>
       <CardContent>
-        <div className={cn("text-lg sm:text-xl lg:text-2xl font-bold break-all leading-tight", trendColors[trend])}>
+        <div className={cn("text-lg sm:text-xl lg:text-2xl font-bold break-words leading-tight", trendColors[trend])}>
           {value}
         </div>
         {description && (
