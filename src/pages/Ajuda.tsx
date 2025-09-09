@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { useNavigate } from "react-router-dom"
 
 const faqItems = [
   {
@@ -71,6 +72,7 @@ const tutorialSteps = [
 ]
 
 export default function Ajuda() {
+  const navigate = useNavigate();
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -113,20 +115,26 @@ export default function Ajuda() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/simular-investimento')}
+            >
               📊 Nova Simulação
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/meus-investimentos')}
+            >
               📁 Meus Investimentos
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/configuracoes')}
+            >
               ⚙️ Configurações
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              📱 Baixar Relatório
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              🎓 Guia de Investimentos
             </Button>
           </CardContent>
         </Card>
