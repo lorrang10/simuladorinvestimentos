@@ -118,14 +118,14 @@ export default function Ajuda() {
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => navigate('/simular-investimento')}
+              onClick={() => navigate('/simular')}
             >
               📊 Nova Simulação
             </Button>
             <Button 
               variant="outline" 
               className="w-full justify-start"
-              onClick={() => navigate('/meus-investimentos')}
+              onClick={() => navigate('/historico')}
             >
               📁 Meus Investimentos
             </Button>
