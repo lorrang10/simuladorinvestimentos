@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      investment_tips: {
+        Row: {
+          ativo: boolean
+          categoria: Database["public"]["Enums"]["tip_category"]
+          created_at: string
+          descricao: string
+          icone: string
+          id: string
+          titulo: string
+        }
+        Insert: {
+          ativo?: boolean
+          categoria: Database["public"]["Enums"]["tip_category"]
+          created_at?: string
+          descricao: string
+          icone?: string
+          id?: string
+          titulo: string
+        }
+        Update: {
+          ativo?: boolean
+          categoria?: Database["public"]["Enums"]["tip_category"]
+          created_at?: string
+          descricao?: string
+          icone?: string
+          id?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           created_at: string
@@ -142,7 +172,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      tip_category:
+        | "investimentos"
+        | "renda_variavel"
+        | "renda_fixa"
+        | "economia"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -269,6 +303,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      tip_category: [
+        "investimentos",
+        "renda_variavel",
+        "renda_fixa",
+        "economia",
+      ],
+    },
   },
 } as const

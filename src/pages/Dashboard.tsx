@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
+import { useInvestmentTips } from "@/hooks/useInvestmentTips"
 import { useState } from "react"
 import type { Tables } from '@/integrations/supabase/types'
 
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const { user } = useAuth()
   const { profile } = useUserProfile()
   const { simulations, loading } = useInvestmentSimulations()
+  const { tips, loading: tipsLoading } = useInvestmentTips()
   const [selectedSimulation, setSelectedSimulation] = useState<string | null>(null)
 
   const formatCurrency = (value: number) => {
@@ -305,30 +307,45 @@ export default function Dashboard() {
         <CardHeader>
           <CardTitle>Dicas Inteligentes</CardTitle>
           <CardDescription>
-            Insights baseados no seu perfil de investidor
+            Insights personalizados para seus investimentos
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 border rounded-lg bg-gradient-to-br from-primary/10 to-primary/5">
-              <h4 className="font-medium text-sm mb-2">📈 Diversificação</h4>
-              <p className="text-xs text-muted-foreground">
-                Considere diversificar 30% em renda variável para maior retorno
-              </p>
+          {tipsLoading ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="p-4 border rounded-lg">
+                  <Skeleton className="h-4 w-6 mb-2" />
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))}
             </div>
-            <div className="p-4 border rounded-lg bg-gradient-to-br from-success/10 to-success/5">
-              <h4 className="font-medium text-sm mb-2">💰 Aportes</h4>
-              <p className="text-xs text-muted-foreground">
-                Aumentar aportes mensais em 20% pode acelerar seus objetivos
-              </p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-3">
+              {tips.map((tip, index) => {
+                const gradients = [
+                  'bg-gradient-to-br from-primary/10 to-primary/5',
+                  'bg-gradient-to-br from-success/10 to-success/5',
+                  'bg-gradient-to-br from-warning/10 to-warning/5'
+                ]
+                
+                return (
+                  <div 
+                    key={tip.id} 
+                    className={`p-4 border rounded-lg ${gradients[index % 3]}`}
+                  >
+                    <h4 className="font-medium text-sm mb-2">
+                      {tip.icone} {tip.titulo}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {tip.descricao}
+                    </p>
+                  </div>
+                )
+              })}
             </div>
-            <div className="p-4 border rounded-lg bg-gradient-to-br from-warning/10 to-warning/5">
-              <h4 className="font-medium text-sm mb-2">⏰ Prazo</h4>
-              <p className="text-xs text-muted-foreground">
-                Investimentos de longo prazo (5+ anos) tendem a ter melhores retornos
-              </p>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
