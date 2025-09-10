@@ -20,21 +20,22 @@ export function useInvestmentTips() {
   const fetchRandomTips = async () => {
     setLoading(true)
     try {
-      // Buscar 3 dicas aleatórias
-      const { data, error } = await supabase
+      // Buscar todas as dicas ativas primeiro
+      const { data: allTips, error } = await supabase
         .from('investment_tips')
         .select('*')
         .eq('ativo', true)
-        .order('random()')
-        .limit(3)
 
       if (error) throw error
 
-      setTips(data || [])
+      // Embaralhar e pegar 3 dicas aleatórias
+      const shuffledTips = allTips?.sort(() => Math.random() - 0.5).slice(0, 3) || []
+
+      setTips(shuffledTips)
       
       // Salvar no localStorage com timestamp
       localStorage.setItem('investment_tips', JSON.stringify({
-        tips: data || [],
+        tips: shuffledTips,
         lastFetch: Date.now()
       }))
     } catch (error) {
