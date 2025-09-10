@@ -15,8 +15,17 @@ export function usePasswordChange() {
         throw new Error('Usuário não encontrado')
       }
 
+      // Primeiro, verificar se a senha atual está correta
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.user.email!,
+        password: currentPassword
+      })
+
+      if (signInError) {
+        throw new Error('Senha atual incorreta')
+      }
+
       // Usar o método nativo do Supabase para alterar a senha
-      // O Supabase verifica automaticamente a sessão atual como prova de identidade
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword
       })
