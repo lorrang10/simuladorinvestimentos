@@ -192,12 +192,6 @@ export default function Ajuda() {
               </Badge>
             </div>
             
-            <div className="pt-4 border-t">
-              <div className="text-sm">
-                <p className="font-medium">Última atualização:</p>
-                <p className="text-muted-foreground">Hoje às 14:30</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
     </div>
