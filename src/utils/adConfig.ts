@@ -2,7 +2,7 @@
 export const adConfig = {
   // Google AdSense (Web)
   adsense: {
-    publisherId: 'ca-pub-XXXXXXXXXX', // Substituir pelo seu Publisher ID
+    publisherId: 'pub-8317059507345583', // Substituir pelo seu Publisher ID
     slots: {
       banner: '1234567890',
       sidebar: '0987654321',
