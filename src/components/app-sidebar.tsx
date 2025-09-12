@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useUserProfile } from "@/hooks/useUserProfile"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useEffect } from "react"
+import { AdBanner } from "@/components/ads/AdBanner"
 
 import {
   Sidebar,
@@ -103,6 +104,14 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Anúncio na sidebar para usuários free */}
+        <div className="px-4">
+          <AdBanner 
+            variant="sidebar"
+            showUpgradeHint={false}
+          />
+        </div>
 
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>

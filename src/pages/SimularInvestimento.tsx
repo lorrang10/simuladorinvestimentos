@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import { useUserProfile } from "@/hooks/useUserProfile"
 import { PremiumBanner } from "@/components/premium/PremiumBanner"
+import { AdBanner } from "@/components/ads/AdBanner"
 
 interface SimulationForm {
   name: string
@@ -285,6 +286,12 @@ export default function SimularInvestimento() {
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 overflow-x-hidden max-w-full">
       <Header title="Simular Investimento" />
+      
+      {/* Anúncio no topo para usuários free */}
+      <AdBanner 
+        variant="top"
+        showUpgradeHint={false}
+      />
       
       {!isPremium && (
         <PremiumBanner 
@@ -618,6 +625,17 @@ export default function SimularInvestimento() {
                 </CardContent>
               </Card>
 
+              {/* Anúncio entre gráfico e resumo para usuários free */}
+              <AdBanner 
+                variant="inline"
+                onUpgradeClick={() => {
+                  toast({
+                    title: "Upgrade para Premium",
+                    description: "Funcionalidade em desenvolvimento",
+                  })
+                }}
+              />
+
               {/* Resumo da Simulação */}
               <Card className="min-w-0 w-full">
                 <CardHeader>
@@ -690,12 +708,24 @@ export default function SimularInvestimento() {
                             description: "Funcionalidade em desenvolvimento",
                           })
                         }}
-                      />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </>
+                       />
+                     </div>
+                   )}
+                 </CardContent>
+               </Card>
+               
+               {/* Anúncio no final dos resultados para usuários free */}
+               <AdBanner 
+                 variant="bottom"
+                 showUpgradeHint={true}
+                 onUpgradeClick={() => {
+                   toast({
+                     title: "Upgrade para Premium", 
+                     description: "Funcionalidade em desenvolvimento",
+                   })
+                 }}
+               />
+             </>
           )}
         </div>
       </div>
