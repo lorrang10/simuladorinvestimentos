@@ -2,10 +2,10 @@
 export const adConfig = {
   // Google AdSense (Web)
   adsense: {
-    publisherId: 'pub-8317059507345583', // Substituir pelo seu Publisher ID
+    publisherId: 'pub-8317059507345583',
     slots: {
       banner: '1234567890',
-      sidebar: '0987654321',
+      sidebar: '7921476489',
       native: '1122334455',
       footer: '6677889900'
     }
@@ -28,7 +28,7 @@ export const adConfig = {
 
   // Configurações gerais
   settings: {
-    enableInDevelopment: false, // Habilitar anúncios em desenvolvimento
+    enableInDevelopment: true, // Habilitar anúncios em desenvolvimento
     refreshInterval: 30000, // 30 segundos
     maxRetries: 3
   }
@@ -41,3 +41,6 @@ export const getAdMobId = (type: 'banner' | 'interstitial' | 'rewarded', platfor
 export const getAdSenseSlot = (type: 'banner' | 'sidebar' | 'native' | 'footer') => {
   return adConfig.adsense.slots[type]
 }
+
+
+ao vivo
