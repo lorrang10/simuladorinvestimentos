@@ -15,6 +15,7 @@ import { useInvestmentSimulations } from "@/hooks/useInvestmentSimulations"
 import { useUserProfile } from "@/hooks/useUserProfile"
 import { PremiumBanner } from "@/components/premium/PremiumBanner"
 import { AdBanner } from "@/components/ads/AdBanner"
+import { useInterstitialAd } from "@/utils/adInterstitial"
 
 interface SimulationForm {
   name: string
@@ -107,6 +108,7 @@ export default function SimularInvestimento() {
   const { toast } = useToast()
   const { createSimulation, simulations } = useInvestmentSimulations()
   const { isPremium } = useUserProfile()
+  const { showAdAfterSimulation, prepareNextAd } = useInterstitialAd()
   const [form, setForm] = useState<SimulationForm>({
     name: "",
     category: "",
@@ -130,6 +132,7 @@ export default function SimularInvestimento() {
   // Buscar taxas reais ao carregar a página
   useEffect(() => {
     fetchInvestmentRates()
+    prepareNextAd() // Preparar anúncio intersticial para mobile
   }, [])
 
   const fetchInvestmentRates = async () => {
@@ -223,6 +226,11 @@ export default function SimularInvestimento() {
       title: "Simulação realizada!",
       description: "Confira os resultados abaixo",
     })
+    
+    // Mostrar anúncio intersticial no mobile após simulação (alto eCPM)
+    if (!isPremium) {
+      setTimeout(() => showAdAfterSimulation(), 1500)
+    }
   }
 
   const handleNewSimulation = () => {
@@ -602,6 +610,12 @@ export default function SimularInvestimento() {
                   trend="neutral"
                 />
               </div>
+
+              {/* Anúncio nativo entre métricas e gráfico - Alto ROI */}
+              <AdBanner 
+                variant="inline"
+                showUpgradeHint={true}
+              />
 
               {/* Gráfico */}
               <Card className="min-w-0 w-full">

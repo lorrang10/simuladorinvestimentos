@@ -13,6 +13,7 @@ import { useUserProfile } from "@/hooks/useUserProfile"
 import { useInvestmentTips } from "@/hooks/useInvestmentTips"
 import { useState } from "react"
 import type { Tables } from '@/integrations/supabase/types'
+import { AdBanner } from "@/components/ads/AdBanner"
 
 type InvestmentSimulation = Tables<'investment_simulations'>
 
@@ -154,6 +155,12 @@ export default function Dashboard() {
     <div className="flex-1 space-y-6 p-6">
       <Header title={`Olá, ${firstName}!`} />
       
+      {/* Anúncio banner no topo do Dashboard - Alta visibilidade */}
+      <AdBanner 
+        variant="top"
+        showUpgradeHint={false}
+      />
+      
       {/* Cards de Métricas */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {loading ? (
@@ -203,6 +210,12 @@ export default function Dashboard() {
           </>
         )}
       </div>
+
+      {/* Anúncio nativo entre métricas e conteúdo - Melhor CTR */}
+      <AdBanner 
+        variant="inline"
+        showUpgradeHint={true}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Gráfico de Crescimento */}
