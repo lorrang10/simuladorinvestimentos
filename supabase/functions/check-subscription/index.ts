@@ -43,8 +43,8 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("CHAVE_QA");
-    if (!stripeKey) throw new Error("CHAVE_QA is not set");
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     logStep("Stripe key verified");
 
     const authHeader = req.headers.get("Authorization");
