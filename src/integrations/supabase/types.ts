@@ -10,160 +10,11 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12 (cd3cf9e)"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      investment_simulations: {
-        Row: {
-          created_at: string | null
-          id: string
-          nome: string
-          percentual_manual: number | null
-          periodo_anos: number
-          rendimento_total: number
-          taxa_juros: number
-          tipo_indexador: string | null
-          user_id: string
-          valor_final: number
-          valor_inicial: number
-          valor_mensal: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          nome: string
-          percentual_manual?: number | null
-          periodo_anos: number
-          rendimento_total: number
-          taxa_juros: number
-          tipo_indexador?: string | null
-          user_id: string
-          valor_final: number
-          valor_inicial: number
-          valor_mensal?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          nome?: string
-          percentual_manual?: number | null
-          periodo_anos?: number
-          rendimento_total?: number
-          taxa_juros?: number
-          tipo_indexador?: string | null
-          user_id?: string
-          valor_final?: number
-          valor_inicial?: number
-          valor_mensal?: number | null
-        }
-        Relationships: []
-      }
-      investment_tips: {
-        Row: {
-          ativo: boolean
-          categoria: Database["public"]["Enums"]["tip_category"]
-          created_at: string
-          descricao: string
-          icone: string
-          id: string
-          titulo: string
-        }
-        Insert: {
-          ativo?: boolean
-          categoria: Database["public"]["Enums"]["tip_category"]
-          created_at?: string
-          descricao: string
-          icone?: string
-          id?: string
-          titulo: string
-        }
-        Update: {
-          ativo?: boolean
-          categoria?: Database["public"]["Enums"]["tip_category"]
-          created_at?: string
-          descricao?: string
-          icone?: string
-          id?: string
-          titulo?: string
-        }
-        Relationships: []
-      }
-      subscribers: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          stripe_customer_id: string | null
-          subscribed: boolean
-          subscription_end: string | null
-          subscription_tier: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          stripe_customer_id?: string | null
-          subscribed?: boolean
-          subscription_end?: string | null
-          subscription_tier?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_profiles: {
-        Row: {
-          created_at: string | null
-          data_nascimento: string | null
-          id: string
-          nome_completo: string | null
-          objetivo_investimento: string | null
-          perfil_risco: string | null
-          plano_assinatura: string | null
-          telefone: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          data_nascimento?: string | null
-          id?: string
-          nome_completo?: string | null
-          objetivo_investimento?: string | null
-          perfil_risco?: string | null
-          plano_assinatura?: string | null
-          telefone?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          data_nascimento?: string | null
-          id?: string
-          nome_completo?: string | null
-          objetivo_investimento?: string | null
-          perfil_risco?: string | null
-          plano_assinatura?: string | null
-          telefone?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
@@ -172,11 +23,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      tip_category:
-        | "investimentos"
-        | "renda_variavel"
-        | "renda_fixa"
-        | "economia"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -303,13 +150,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      tip_category: [
-        "investimentos",
-        "renda_variavel",
-        "renda_fixa",
-        "economia",
-      ],
-    },
+    Enums: {},
   },
 } as const
