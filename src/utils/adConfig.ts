@@ -15,7 +15,7 @@
  */
 
 // ---------- Google AdSense (Web) ----------
-const ADSENSE_PUBLISHER_ID = 'ca-pub-1263564821286429'
+const ADSENSE_PUBLISHER_ID = 'ca-pub-8317059507345583'
 
 const ADSENSE_SLOTS = {
   banner:  '6020809553',               // ✅ Slot ativo (banner topo Dashboard / Simulador)
