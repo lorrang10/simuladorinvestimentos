@@ -1,12 +1,12 @@
 import { Capacitor } from '@capacitor/core'
-import { getAdMobId } from './adConfig'
+import { adConfig, getAdMobId, isAdMobTestMode } from './adConfig'
 
-// Gerenciador de anúncios intersticiais para mobile
+// Gerenciador de anúncios intersticiais para mobile (AdMob via Capacitor)
 export class InterstitialAdManager {
   private static instance: InterstitialAdManager
   private adLoaded = false
   private lastShown = 0
-  private readonly MIN_INTERVAL = 180000 // 3 minutos entre anúncios
+  private readonly MIN_INTERVAL = adConfig.settings.interstitialMinInterval
 
   private constructor() {}
 
@@ -23,13 +23,15 @@ export class InterstitialAdManager {
     try {
       const AdMobModule = await import('@capacitor-community/admob')
       const { AdMob } = AdMobModule
-      
+
       const platform = Capacitor.getPlatform() as 'android' | 'ios'
       const adId = getAdMobId('interstitial', platform)
 
       const options = {
         adId,
-        isTesting: false, // Mudar para false em produção
+        // Modo de teste enquanto os IDs reais do AdMob não estiverem configurados.
+        // Importante: nunca clique em anúncios reais para testar — viola políticas.
+        isTesting: isAdMobTestMode(platform),
       }
 
       await AdMob.prepareInterstitial(options)
