@@ -33,9 +33,10 @@ export function AdSenseComponent({
     }
   }, [])
 
-  // Não renderiza nada enquanto o Publisher ID for placeholder
+  // Não renderiza enquanto o Publisher ID ou o Slot ID forem placeholder
   // (evita slots vazios e violação de políticas do AdSense).
   if (!isAdSenseConfigured()) return null
+  if (!adSlot || adSlot.startsWith('REPLACE_ME')) return null
 
   return (
     <div className={`ad-container ${className}`} style={style}>
