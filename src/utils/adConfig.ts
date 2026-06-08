@@ -15,13 +15,13 @@
  */
 
 // ---------- Google AdSense (Web) ----------
-const ADSENSE_PUBLISHER_ID = 'REPLACE_ME_CA_PUB' // ex: 'ca-pub-1234567890123456'
+const ADSENSE_PUBLISHER_ID = 'ca-pub-1263564821286429'
 
 const ADSENSE_SLOTS = {
-  banner:  'REPLACE_ME_SLOT_BANNER',   // Slot horizontal responsivo (topo Dashboard / Simulador)
-  sidebar: 'REPLACE_ME_SLOT_SIDEBAR',  // Slot 300x250 (sidebar desktop)
-  native:  'REPLACE_ME_SLOT_NATIVE',   // Slot nativo in-feed (entre seções)
-  footer:  'REPLACE_ME_SLOT_FOOTER',   // Slot horizontal rodapé (opcional)
+  banner:  '6020809553',               // ✅ Slot ativo (banner topo Dashboard / Simulador)
+  sidebar: 'REPLACE_ME_SLOT_SIDEBAR',  // Crie no AdSense (300x250) e cole aqui
+  native:  'REPLACE_ME_SLOT_NATIVE',   // Crie no AdSense (in-feed) e cole aqui
+  footer:  'REPLACE_ME_SLOT_FOOTER',   // Crie no AdSense (responsivo rodapé) e cole aqui
 }
 
 // ---------- Google AdMob (Capacitor / Mobile) ----------
