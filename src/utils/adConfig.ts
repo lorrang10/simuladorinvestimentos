@@ -1,43 +1,96 @@
-// Configurações centralizadas para anúncios
-export const adConfig = {
-  // Google AdSense (Web)
-  adsense: {
-    publisherId: 'ca-pub-XXXXXXXXXX', // Substituir pelo seu Publisher ID
-    slots: {
-      banner: '1234567890',
-      sidebar: '0987654321',
-      native: '1122334455',
-      footer: '6677889900'
-    }
-  },
+/**
+ * ============================================================
+ * CONFIGURAÇÃO CENTRALIZADA DE ANÚNCIOS
+ * ============================================================
+ *
+ * 👉 Para ativar a monetização REAL, substitua os valores marcados
+ *    com "REPLACE_ME" pelos seus IDs do Google AdSense / AdMob.
+ *
+ * Enquanto os valores forem "REPLACE_ME", nenhum anúncio será
+ * carregado (evita erros no console e violação de políticas do
+ * AdSense por exibir slots vazios).
+ *
+ * Veja o passo a passo em: CHECKLIST_MONETIZACAO.md
+ * ============================================================
+ */
 
-  // Google AdMob (Mobile)
-  admob: {
-    // IDs de teste - substituir pelos IDs reais em produção
-    android: {
-      banner: 'ca-app-pub-3940256099942544/6300978111',
-      interstitial: 'ca-app-pub-3940256099942544/1033173712',
-      rewarded: 'ca-app-pub-3940256099942544/5224354917'
-    },
-    ios: {
-      banner: 'ca-app-pub-3940256099942544/2934735716', 
-      interstitial: 'ca-app-pub-3940256099942544/4411468910',
-      rewarded: 'ca-app-pub-3940256099942544/1712485313'
-    }
-  },
+// ---------- Google AdSense (Web) ----------
+const ADSENSE_PUBLISHER_ID = 'REPLACE_ME_CA_PUB' // ex: 'ca-pub-1234567890123456'
 
-  // Configurações gerais
-  settings: {
-    enableInDevelopment: false, // Habilitar anúncios em desenvolvimento
-    refreshInterval: 30000, // 30 segundos
-    maxRetries: 3
+const ADSENSE_SLOTS = {
+  banner:  'REPLACE_ME_SLOT_BANNER',   // Slot horizontal responsivo (topo Dashboard / Simulador)
+  sidebar: 'REPLACE_ME_SLOT_SIDEBAR',  // Slot 300x250 (sidebar desktop)
+  native:  'REPLACE_ME_SLOT_NATIVE',   // Slot nativo in-feed (entre seções)
+  footer:  'REPLACE_ME_SLOT_FOOTER',   // Slot horizontal rodapé (opcional)
+}
+
+// ---------- Google AdMob (Capacitor / Mobile) ----------
+// IDs de TESTE oficiais do Google. Não geram receita, mas evitam
+// banimento durante o desenvolvimento. Troque pelos IDs reais antes
+// de publicar na Play Store / App Store.
+const ADMOB_TEST_IDS = {
+  android: {
+    banner:       'ca-app-pub-3940256099942544/6300978111',
+    interstitial: 'ca-app-pub-3940256099942544/1033173712',
+    rewarded:     'ca-app-pub-3940256099942544/5224354917',
+  },
+  ios: {
+    banner:       'ca-app-pub-3940256099942544/2934735716',
+    interstitial: 'ca-app-pub-3940256099942544/4411468910',
+    rewarded:     'ca-app-pub-3940256099942544/1712485313',
+  },
+}
+
+const ADMOB_PRODUCTION_IDS = {
+  android: {
+    banner:       'REPLACE_ME_ADMOB_ANDROID_BANNER',
+    interstitial: 'REPLACE_ME_ADMOB_ANDROID_INTERSTITIAL',
+    rewarded:     'REPLACE_ME_ADMOB_ANDROID_REWARDED',
+  },
+  ios: {
+    banner:       'REPLACE_ME_ADMOB_IOS_BANNER',
+    interstitial: 'REPLACE_ME_ADMOB_IOS_INTERSTITIAL',
+    rewarded:     'REPLACE_ME_ADMOB_IOS_REWARDED',
+  },
+}
+
+// ---------- Helpers ----------
+
+/** Detecta se um valor ainda é um placeholder REPLACE_ME_*. */
+const isPlaceholder = (value: string) => value.startsWith('REPLACE_ME')
+
+/** AdSense só carrega se o Publisher ID estiver configurado. */
+export const isAdSenseConfigured = (): boolean =>
+  !isPlaceholder(ADSENSE_PUBLISHER_ID) && ADSENSE_PUBLISHER_ID.startsWith('ca-pub-')
+
+/** AdMob produção só roda se TODOS os IDs da plataforma estiverem preenchidos. */
+export const isAdMobProductionConfigured = (platform: 'android' | 'ios'): boolean =>
+  Object.values(ADMOB_PRODUCTION_IDS[platform]).every((id) => !isPlaceholder(id))
+
+export const getAdSensePublisherId = (): string => ADSENSE_PUBLISHER_ID
+
+export const getAdSenseSlot = (slot: keyof typeof ADSENSE_SLOTS): string => ADSENSE_SLOTS[slot]
+
+export const getAdMobId = (
+  type: 'banner' | 'interstitial' | 'rewarded',
+  platform: 'android' | 'ios',
+): string => {
+  // Usa IDs reais quando estiverem configurados, senão volta para os IDs de teste.
+  if (isAdMobProductionConfigured(platform)) {
+    return ADMOB_PRODUCTION_IDS[platform][type]
   }
+  return ADMOB_TEST_IDS[platform][type]
 }
 
-export const getAdMobId = (type: 'banner' | 'interstitial' | 'rewarded', platform: 'android' | 'ios') => {
-  return adConfig.admob[platform][type]
-}
+/** Indica se devemos rodar AdMob em modo de teste (não gera receita). */
+export const isAdMobTestMode = (platform: 'android' | 'ios'): boolean =>
+  !isAdMobProductionConfigured(platform)
 
-export const getAdSenseSlot = (type: 'banner' | 'sidebar' | 'native' | 'footer') => {
-  return adConfig.adsense.slots[type]
+export const adConfig = {
+  settings: {
+    refreshInterval: 30_000, // 30s
+    maxRetries: 3,
+    /** Intervalo mínimo entre intersticiais (ms). 3 min é o recomendado pelo Google. */
+    interstitialMinInterval: 180_000,
+  },
 }
