@@ -16,6 +16,7 @@ import { useUserProfile } from "@/hooks/useUserProfile"
 import { PremiumBanner } from "@/components/premium/PremiumBanner"
 import { AdBanner } from "@/components/ads/AdBanner"
 import { useInterstitialAd } from "@/utils/adInterstitial"
+import { calculateTax, getTaxRegime } from "@/utils/investmentTax"
 
 interface SimulationForm {
   name: string
