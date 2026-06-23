@@ -105,7 +105,29 @@ async function fetchCDIRate(): Promise<number> {
     throw new Error('No CDI data received')
   } catch (error) {
     console.error('Error fetching CDI rate:', error)
-    return 0.1150 // Fallback próximo à Selic
+    return FALLBACK_CDI
+  }
+}
+
+async function fetchIPCARate(): Promise<number> {
+  try {
+    // Série 433 = IPCA mensal. Pegamos os últimos 12 meses e acumulamos.
+    const response = await fetch(
+      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/12?formato=json'
+    )
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const data = await response.json()
+    if (Array.isArray(data) && data.length === 12) {
+      const accumulated = data.reduce((acc: number, item: any) => {
+        return acc * (1 + parseFloat(item.valor) / 100)
+      }, 1) - 1
+      console.log(`IPCA acumulado 12m: ${(accumulated * 100).toFixed(2)}%`)
+      return accumulated
+    }
+    throw new Error('No IPCA data')
+  } catch (error) {
+    console.error('Error fetching IPCA rate:', error)
+    return FALLBACK_IPCA
   }
 }
 
