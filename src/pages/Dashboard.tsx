@@ -40,7 +40,7 @@ export default function Dashboard() {
   }
 
   const getTotalInvested = () => {
-    return simulations.reduce((total, sim) => total + sim.valor_inicial + (sim.valor_mensal * 12 * sim.periodo_anos), 0)
+    return simulations.reduce((total, sim) => total + sim.valor_inicial + ((sim.valor_mensal || 0) * 12 * sim.periodo_anos), 0)
   }
 
   const getAverageReturn = () => {

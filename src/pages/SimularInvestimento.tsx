@@ -16,6 +16,7 @@ import { useUserProfile } from "@/hooks/useUserProfile"
 import { PremiumBanner } from "@/components/premium/PremiumBanner"
 import { AdBanner } from "@/components/ads/AdBanner"
 import { useInterstitialAd } from "@/utils/adInterstitial"
+import { calculateTax, getTaxRegime } from "@/utils/investmentTax"
 
 interface SimulationForm {
   name: string
@@ -173,28 +174,26 @@ export default function SimularInvestimento() {
     return investmentRates[investmentType] || 0.12 // fallback para 12%
   }
   
-  // Função para calcular taxa com percentual manual
+  // Calcula a taxa efetiva a.a. dado um percentual e um indexador.
+  // - CDI / SELIC: multiplicativo  => (perc/100) * indice
+  // - IPCA:        aditivo (IPCA+) => indice + (perc/100)
+  // - FIXO:        usa o próprio percentual como taxa nominal a.a.
   const calculateManualRate = (percentage: string, indexer: string): number => {
-    const percentageNum = parseFloat(percentage)
-    if (isNaN(percentageNum)) return 0.12
-    
-    let baseRate = 0.12 // taxa padrão
-    
+    const perc = parseFloat(percentage)
+    if (isNaN(perc) || perc <= 0) return 0
+
+    if (indexer === 'FIXO') return perc / 100
+
+    const cdi   = investmentRates['cdi']   ?? 0.149
+    const selic = investmentRates['selic'] ?? 0.15
+    const ipca  = investmentRates['ipca']  ?? 0.045
+
     switch (indexer) {
-      case 'CDI':
-        baseRate = investmentRates['cdi'] || 0.1075
-        break
-      case 'SELIC':
-        baseRate = investmentRates['selic'] || 0.105
-        break
-      case 'IPCA':
-        baseRate = investmentRates['ipca'] || 0.045
-        break
-      case 'FIXO':
-        return percentageNum / 100
+      case 'CDI':   return cdi   * (perc / 100)
+      case 'SELIC': return selic * (perc / 100)
+      case 'IPCA':  return ipca + (perc / 100) // padrão IPCA+ (juro real somado à inflação)
+      default:      return perc / 100
     }
-    
-    return (baseRate * percentageNum) / 100
   }
 
   const selectedCategory = investmentCategories.find(cat => cat.id === form.category)
@@ -290,6 +289,13 @@ export default function SimularInvestimento() {
   }
   
   const profit = finalValue - totalInvested
+
+  // Imposto de Renda conforme tipo de produto (IPCA/FIXO no modo manual => assume renda fixa tributável)
+  const taxKey = form.useManualRate ? 'cdb' : form.type
+  const taxInfo = calculateTax(taxKey, profit, totalInvested, totalMonths)
+  const netFinalValue = taxInfo.netFinalValue
+  const netProfit = taxInfo.netProfit
+  const taxRegime = getTaxRegime(taxKey)
 
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 overflow-x-hidden max-w-full">
@@ -575,30 +581,51 @@ export default function SimularInvestimento() {
               {/* Métricas dos Resultados */}
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full">
                 <MetricCard
-                  title="Retorno Total Estimado"
+                  title="Retorno Bruto Estimado"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalValue)}
-                  description={`Investimento de ${years.toFixed(2).replace('.', ',')} ${years === 1 ? 'ano' : 'anos'}`}
+                  description={`Antes de IR · ${years.toFixed(2).replace('.', ',')} ${years === 1 ? 'ano' : 'anos'}`}
                   icon={<DollarSign className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
-                  title="Rendimento Total"
-                  value={`${(((finalValue / totalInvested) - 1) * 100).toFixed(2)}%`}
-                  description="Percentual de ganho total"
-                  icon={<TrendingUp className="h-4 w-4" />}
+                  title={taxInfo.exempt ? "Retorno Líquido (Isento IR)" : "Retorno Líquido (após IR)"}
+                  value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(netFinalValue)}
+                  description={
+                    taxInfo.exempt
+                      ? "Produto isento de Imposto de Renda"
+                      : `IR ${(taxInfo.taxRate * 100).toFixed(1)}% · ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(taxInfo.taxAmount)} de imposto`
+                  }
+                  icon={<DollarSign className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
                   title="Rentabilidade Anual"
-                  value={`${(annualReturn * 100).toFixed(1)}%`}
-                  description="Taxa estimada a.a."
+                  value={`${(annualReturn * 100).toFixed(2)}%`}
+                  description={
+                    taxRegime === 'rv-15'
+                      ? "Estimativa nominal (média histórica)"
+                      : taxRegime === 'isento'
+                        ? "Taxa bruta = líquida (isento IR)"
+                        : "Taxa bruta a.a."
+                  }
                   icon={<Percent className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
-                  title="Lucro Estimado"
+                  title="Lucro Bruto"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(profit)}
-                  description="Ganho sobre o investido"
+                  description="Ganho antes do IR"
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Lucro Líquido"
+                  value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(netProfit)}
+                  description={
+                    taxInfo.exempt
+                      ? "Sem desconto de IR"
+                      : `Após ${(taxInfo.taxRate * 100).toFixed(1)}% de IR sobre o lucro`
+                  }
                   icon={<TrendingUp className="h-4 w-4" />}
                   trend="up"
                 />
