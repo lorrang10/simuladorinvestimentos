@@ -580,7 +580,6 @@ export default function SimularInvestimento() {
             <>
               {/* Métricas dos Resultados */}
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full">
-              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full">
                 <MetricCard
                   title="Retorno Bruto Estimado"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalValue)}
