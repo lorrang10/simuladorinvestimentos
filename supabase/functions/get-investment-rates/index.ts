@@ -144,87 +144,45 @@ async function fetchRealRates(): Promise<Record<string, InvestmentRate>> {
     console.log('Fetching fresh investment rates from Banco Central...')
     
     // Busca taxas reais em paralelo
-    const [selicRate, cdiRate] = await Promise.all([
+    const [selicRate, cdiRate, ipcaRate] = await Promise.all([
       fetchSelicRate(),
-      fetchCDIRate()
+      fetchCDIRate(),
+      fetchIPCARate(),
     ])
-    
-    console.log(`Selic rate: ${(selicRate * 100).toFixed(2)}%`)
-    console.log(`CDI rate: ${(cdiRate * 100).toFixed(2)}%`)
-    
-    // Valida se as taxas estão em uma faixa razoável (entre 0.5% e 25%)
-    const isValidRate = (rate: number) => rate >= 0.005 && rate <= 0.25
-    
-    const validSelicRate = isValidRate(selicRate) ? selicRate : 0.1175
-    const validCdiRate = isValidRate(cdiRate) ? cdiRate : 0.1150
-    
-    if (!isValidRate(selicRate)) {
-      console.warn(`Invalid Selic rate ${selicRate}, using fallback`)
-    }
-    if (!isValidRate(cdiRate)) {
-      console.warn(`Invalid CDI rate ${cdiRate}, using fallback`)
-    }
-    
-    // Calcula taxas baseadas nas referências reais e validadas
+
+    console.log(`Selic: ${(selicRate*100).toFixed(2)}% | CDI: ${(cdiRate*100).toFixed(2)}% | IPCA 12m: ${(ipcaRate*100).toFixed(2)}%`)
+
+    // Validação de faixa razoável
+    const inRange = (v: number, min: number, max: number) => v >= min && v <= max
+    const validSelic = inRange(selicRate, 0.02, 0.30) ? selicRate : FALLBACK_SELIC
+    const validCdi   = inRange(cdiRate,   0.02, 0.30) ? cdiRate   : FALLBACK_CDI
+    const validIpca  = inRange(ipcaRate, -0.05, 0.30) ? ipcaRate  : FALLBACK_IPCA
+
+    const ts = new Date().toISOString()
     const updatedRates: Record<string, InvestmentRate> = {
-      'tesouro-direto': {
-        type: 'Tesouro Direto',
-        rate: validSelicRate + 0.005, // Selic + 0.5% spread
-        lastUpdated: new Date().toISOString()
-      },
-      'cdb': {
-        type: 'CDB',
-        rate: validCdiRate * 1.05, // 105% do CDI
-        lastUpdated: new Date().toISOString()
-      },
-      'lci': {
-        type: 'LCI',
-        rate: validCdiRate * 0.88, // 88% do CDI (isento de IR)
-        lastUpdated: new Date().toISOString()
-      },
-      'lca': {
-        type: 'LCA',
-        rate: validCdiRate * 0.90, // 90% do CDI (isento de IR)
-        lastUpdated: new Date().toISOString()
-      },
-      'debentures': {
-        type: 'Debêntures',
-        rate: validSelicRate + 0.02, // Selic + 2% spread
-        lastUpdated: new Date().toISOString()
-      },
-      'letras-cambio': {
-        type: 'Letras de Câmbio',
-        rate: validCdiRate * 1.00, // 100% do CDI
-        lastUpdated: new Date().toISOString()
-      },
-      // Renda Variável - baseada em histórico e CDI + risco (ajustado para perfil conservador)
-      'acoes': {
-        type: 'Ações',
-        rate: validCdiRate + 0.03, // CDI + 3% (mais conservador para ações)
-        lastUpdated: new Date().toISOString()
-      },
-      'etfs': {
-        type: 'ETFs',
-        rate: validCdiRate + 0.015, // CDI + 1.5% (mais conservador para ETFs)
-        lastUpdated: new Date().toISOString()
-      },
-      'fiis': {
-        type: 'FIIs',
-        rate: validCdiRate + 0.01, // CDI + 1% (mais conservador para FIIs)
-        lastUpdated: new Date().toISOString()
-      }
+      // Índices base (necessários para "% do CDI / Selic / IPCA+")
+      'selic':         { type: 'Selic',            rate: validSelic,         lastUpdated: ts },
+      'cdi':           { type: 'CDI',              rate: validCdi,           lastUpdated: ts },
+      'ipca':          { type: 'IPCA',             rate: validIpca,          lastUpdated: ts },
+      // Renda Fixa (taxas BRUTAS - IR aplicado no cliente conforme o produto)
+      'tesouro-direto':{ type: 'Tesouro Direto',   rate: validSelic + 0.005, lastUpdated: ts }, // Selic + 0,5%
+      'cdb':           { type: 'CDB',              rate: validCdi * 1.05,    lastUpdated: ts }, // 105% CDI
+      'lci':           { type: 'LCI',              rate: validCdi * 0.90,    lastUpdated: ts }, // 90% CDI (isento IR)
+      'lca':           { type: 'LCA',              rate: validCdi * 0.92,    lastUpdated: ts }, // 92% CDI (isento IR)
+      'debentures':    { type: 'Debêntures',       rate: validSelic + 0.02,  lastUpdated: ts }, // Selic + 2%
+      'letras-cambio': { type: 'Letras de Câmbio', rate: validCdi * 1.00,    lastUpdated: ts }, // 100% CDI
+      // Renda Variável - médias históricas reais nominais de longo prazo
+      'acoes':         { type: 'Ações',            rate: 0.14,               lastUpdated: ts }, // Ibovespa histórico ~14% a.a.
+      'etfs':          { type: 'ETFs',             rate: 0.13,               lastUpdated: ts },
+      'fiis':          { type: 'FIIs',             rate: 0.13,               lastUpdated: ts }, // IFIX histórico ~13% a.a.
     }
-    
-    // Log das taxas finais para debug
-    Object.entries(updatedRates).forEach(([key, rate]) => {
-      console.log(`${rate.type}: ${(rate.rate * 100).toFixed(2)}%`)
+
+    Object.entries(updatedRates).forEach(([key, r]) => {
+      console.log(`${key}: ${(r.rate * 100).toFixed(2)}%`)
     })
-    
-    // Atualiza o cache
+
     cachedRates = updatedRates
     lastFetchTime = now
-    
-    console.log('Successfully updated investment rates with real data')
     return updatedRates
     
   } catch (error) {
