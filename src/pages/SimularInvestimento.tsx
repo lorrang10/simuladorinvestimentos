@@ -174,28 +174,26 @@ export default function SimularInvestimento() {
     return investmentRates[investmentType] || 0.12 // fallback para 12%
   }
   
-  // Função para calcular taxa com percentual manual
+  // Calcula a taxa efetiva a.a. dado um percentual e um indexador.
+  // - CDI / SELIC: multiplicativo  => (perc/100) * indice
+  // - IPCA:        aditivo (IPCA+) => indice + (perc/100)
+  // - FIXO:        usa o próprio percentual como taxa nominal a.a.
   const calculateManualRate = (percentage: string, indexer: string): number => {
-    const percentageNum = parseFloat(percentage)
-    if (isNaN(percentageNum)) return 0.12
-    
-    let baseRate = 0.12 // taxa padrão
-    
+    const perc = parseFloat(percentage)
+    if (isNaN(perc) || perc <= 0) return 0
+
+    if (indexer === 'FIXO') return perc / 100
+
+    const cdi   = investmentRates['cdi']   ?? 0.149
+    const selic = investmentRates['selic'] ?? 0.15
+    const ipca  = investmentRates['ipca']  ?? 0.045
+
     switch (indexer) {
-      case 'CDI':
-        baseRate = investmentRates['cdi'] || 0.1075
-        break
-      case 'SELIC':
-        baseRate = investmentRates['selic'] || 0.105
-        break
-      case 'IPCA':
-        baseRate = investmentRates['ipca'] || 0.045
-        break
-      case 'FIXO':
-        return percentageNum / 100
+      case 'CDI':   return cdi   * (perc / 100)
+      case 'SELIC': return selic * (perc / 100)
+      case 'IPCA':  return ipca + (perc / 100) // padrão IPCA+ (juro real somado à inflação)
+      default:      return perc / 100
     }
-    
-    return (baseRate * percentageNum) / 100
   }
 
   const selectedCategory = investmentCategories.find(cat => cat.id === form.category)
