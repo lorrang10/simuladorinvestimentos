@@ -580,31 +580,53 @@ export default function SimularInvestimento() {
             <>
               {/* Métricas dos Resultados */}
               <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full">
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full max-w-full">
                 <MetricCard
-                  title="Retorno Total Estimado"
+                  title="Retorno Bruto Estimado"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(finalValue)}
-                  description={`Investimento de ${years.toFixed(2).replace('.', ',')} ${years === 1 ? 'ano' : 'anos'}`}
+                  description={`Antes de IR · ${years.toFixed(2).replace('.', ',')} ${years === 1 ? 'ano' : 'anos'}`}
                   icon={<DollarSign className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
-                  title="Rendimento Total"
-                  value={`${(((finalValue / totalInvested) - 1) * 100).toFixed(2)}%`}
-                  description="Percentual de ganho total"
-                  icon={<TrendingUp className="h-4 w-4" />}
+                  title={taxInfo.exempt ? "Retorno Líquido (Isento IR)" : "Retorno Líquido (após IR)"}
+                  value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(netFinalValue)}
+                  description={
+                    taxInfo.exempt
+                      ? "Produto isento de Imposto de Renda"
+                      : `IR ${(taxInfo.taxRate * 100).toFixed(1)}% · ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(taxInfo.taxAmount)} de imposto`
+                  }
+                  icon={<DollarSign className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
                   title="Rentabilidade Anual"
-                  value={`${(annualReturn * 100).toFixed(1)}%`}
-                  description="Taxa estimada a.a."
+                  value={`${(annualReturn * 100).toFixed(2)}%`}
+                  description={
+                    taxRegime === 'rv-15'
+                      ? "Estimativa nominal (média histórica)"
+                      : taxRegime === 'isento'
+                        ? "Taxa bruta = líquida (isento IR)"
+                        : "Taxa bruta a.a."
+                  }
                   icon={<Percent className="h-4 w-4" />}
                   trend="up"
                 />
                 <MetricCard
-                  title="Lucro Estimado"
+                  title="Lucro Bruto"
                   value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(profit)}
-                  description="Ganho sobre o investido"
+                  description="Ganho antes do IR"
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  trend="up"
+                />
+                <MetricCard
+                  title="Lucro Líquido"
+                  value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(netProfit)}
+                  description={
+                    taxInfo.exempt
+                      ? "Sem desconto de IR"
+                      : `Após ${(taxInfo.taxRate * 100).toFixed(1)}% de IR sobre o lucro`
+                  }
                   icon={<TrendingUp className="h-4 w-4" />}
                   trend="up"
                 />
