@@ -290,6 +290,13 @@ export default function SimularInvestimento() {
   
   const profit = finalValue - totalInvested
 
+  // Imposto de Renda conforme tipo de produto (IPCA/FIXO no modo manual => assume renda fixa tributável)
+  const taxKey = form.useManualRate ? 'cdb' : form.type
+  const taxInfo = calculateTax(taxKey, profit, totalInvested, totalMonths)
+  const netFinalValue = taxInfo.netFinalValue
+  const netProfit = taxInfo.netProfit
+  const taxRegime = getTaxRegime(taxKey)
+
   return (
     <div className="flex-1 space-y-6 p-4 sm:p-6 overflow-x-hidden max-w-full">
       <Header title="Simular Investimento" />
