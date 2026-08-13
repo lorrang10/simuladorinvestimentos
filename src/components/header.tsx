@@ -39,18 +39,18 @@ export function Header({ title }: HeaderProps) {
         {/* Perfil do Usuário */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 px-2">
+            <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-muted">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="" />
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                  {profile?.nome_completo ? 
-                    profile.nome_completo.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 
+                <AvatarFallback className="bg-primary text-white text-sm font-semibold">
+                  {profile?.nome_completo ?
+                    profile.nome_completo.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() :
                     'U'
                   }
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium text-foreground">
                   {profile?.nome_completo || 'Usuário'}
                 </p>
                 <p className="text-xs text-muted-foreground">
