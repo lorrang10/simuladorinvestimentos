@@ -57,11 +57,11 @@
 
     /* Sidebar */
     --sidebar-background: 222 47% 10%;
-    --sidebar-foreground: 210 40% 96%;
+    --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 213 94% 62%;
-    --sidebar-primary-foreground: 222 47% 10%;
-    --sidebar-accent: 219 34% 18%;
-    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 219 34% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 216 30% 22%;
     --sidebar-ring: 213 94% 62%;
 

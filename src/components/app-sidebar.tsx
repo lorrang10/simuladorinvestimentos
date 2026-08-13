@@ -50,9 +50,9 @@ export function AppSidebar() {
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive 
-      ? "bg-sidebar-accent text-sidebar-primary-foreground font-medium" 
-      : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+    isActive
+      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+      : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
 
   return (
     <Sidebar
@@ -83,12 +83,12 @@ export function AppSidebar() {
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end 
+                    <NavLink
+                      to={item.url}
+                      end
                       className={getNavCls}
                     >
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className="h-4 w-4 shrink-0" />
                       {!collapsed && (
                         <div className="flex items-center justify-between w-full">
                           <span>{item.title}</span>
