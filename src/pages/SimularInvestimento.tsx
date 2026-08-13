@@ -321,23 +321,24 @@ export default function SimularInvestimento() {
       
       {/* Status das Taxas */}
       {ratesSource && (
-        <Card className="border-success/20 bg-success/5">
+        <Card className="border-success/30 bg-success/10">
           <CardContent className="pt-4">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                <span className="text-black font-medium">
+                <span className="text-success font-semibold">
                   Taxas em tempo real ativas
                 </span>
               </div>
-              <div className="text-muted-foreground">
+              <div className="text-foreground/80">
                 Fonte: {ratesSource} | Atualizado: {new Date(ratesLastUpdated).toLocaleString('pt-BR')}
               </div>
             </div>
             <div className="mt-3 pt-3 border-t border-success/20">
-              <p className="text-sm text-muted-foreground">
-                <strong>Importante:</strong> As taxas de Renda Fixa são atualizadas com dados do Banco Central (Selic/CDI). 
-                As taxas de Renda Variável são estimativas baseadas em médias históricas e podem variar significativamente. 
+              <p className="text-sm text-foreground/80">
+                <span className="font-semibold text-success">Importante:</span>{" "}
+                As taxas de Renda Fixa são atualizadas com dados do Banco Central (Selic/CDI).
+                As taxas de Renda Variável são estimativas baseadas em médias históricas e podem variar significativamente.
                 Todas as projeções são para fins educacionais e não constituem recomendação de investimento.
               </p>
             </div>
